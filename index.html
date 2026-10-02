@@ -759,6 +759,12 @@
           C: [],
           D: []
         },
+        groupMatches: {
+          A: [],
+          B: [],
+          C: [],
+          D: []
+        },
         knockout: {
           quarterfinals: [
             { id:"QF1", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
@@ -803,6 +809,8 @@
         firebaseDB.ref(DB_PATH).on('value', snap => {
           const data = snap.val();
           if (data) {
+            // Backward compat: old data may not have groupMatches
+            if (!data.groupMatches) data.groupMatches = { A: [], B: [], C: [], D: [] };
             AppState = data;
             Renderer.renderAll();
             const ts = new Date(AppState.lastUpdated);
@@ -878,9 +886,17 @@
           const sorted = [...AppState.groups[gid]].sort((a,b) => b.pts - a.pts || b.w - a.w || (a.l - b.l));
           const card = document.createElement("div");
           card.className = "group-card";
+
+          // Check if all matches in this group have been completed
+          const matches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
+          const totalMatches = matches.length;
+          const completedMatches = matches.filter(m => m.played).length;
+          const isGroupComplete = totalMatches > 0 && completedMatches === totalMatches;
+
           let rows = "";
           sorted.forEach((t,i) => {
-            const isQ = i < 2 && sorted.length >= 2;
+            // Only qualify top 2 if ALL matches in the group are finished
+            const isQ = isGroupComplete && i < 2 && sorted.length >= 2;
             t.q = isQ; // Mark qualification status
             const bc = i===0?"gold":i===1?"silver":"";
             const init = t.name.charAt(0).toUpperCase();
@@ -893,7 +909,16 @@
               <td class="center pts-cell">${t.pts}</td>
             </tr>`;
           });
-          card.innerHTML = `<div class="group-card-header"><span class="group-card-title">Group ${gid}</span><span class="group-card-subtitle">Round Robin</span></div>
+
+          // Status subtitle
+          let statusText = "Round Robin";
+          if (totalMatches > 0) {
+            statusText = isGroupComplete
+              ? `✅ Complete (${completedMatches}/${totalMatches} matches)`
+              : `⏳ In Progress (${completedMatches}/${totalMatches} matches)`;
+          }
+
+          card.innerHTML = `<div class="group-card-header"><span class="group-card-title">Group ${gid}</span><span class="group-card-subtitle">${statusText}</span></div>
             <table class="standings-table"><thead><tr><th class="center" style="width:38px">#</th><th>Team</th><th class="center">MP</th><th class="center">W</th><th class="center">L</th><th class="center">PTS</th></tr></thead><tbody>${rows}</tbody></table>`;
           container.appendChild(card);
         });
@@ -1122,8 +1147,25 @@
           groups[groupOrder[groupIdx]].push(team);
         });
 
+        // Initialize round-robin matches for each group
+        const groupMatches = { A: [], B: [], C: [], D: [] };
+        groupOrder.forEach(gid => {
+          const gTeams = groups[gid];
+          for (let i = 0; i < gTeams.length; i++) {
+            for (let j = i + 1; j < gTeams.length; j++) {
+              groupMatches[gid].push({
+                team1: i,
+                team2: j,
+                winner: null,
+                played: false
+              });
+            }
+          }
+        });
+
         // Update AppState
         AppState.groups = groups;
+        AppState.groupMatches = groupMatches;
         AppState.lastUpdated = new Date().toISOString();
 
         // Auto-populate quarterfinals with top 2 from each group
@@ -1155,44 +1197,100 @@
           return;
         }
 
-        // Generate all possible matches
-        let html = '<div style="margin-top:16px;">';
-        for (let i = 0; i < teams.length; i++) {
-          for (let j = i + 1; j < teams.length; j++) {
-            html += `
-              <div class="match-stats-item">
-                <div class="match-info">
-                  <div class="match-teams">${teams[i].name} vs ${teams[j].name}</div>
-                  <div class="match-group">Group ${groupId}</div>
-                </div>
-                <button class="btn btn-blue" onclick="Admin.recordGroupMatch('${groupId}', ${i}, ${j})" style="padding:8px 16px;">
-                  Enter Result
-                </button>
-              </div>
-            `;
+        // Ensure groupMatches exists for this group
+        if (!AppState.groupMatches) AppState.groupMatches = { A: [], B: [], C: [], D: [] };
+        if (!AppState.groupMatches[groupId] || AppState.groupMatches[groupId].length === 0) {
+          // Initialize if missing
+          AppState.groupMatches[groupId] = [];
+          for (let i = 0; i < teams.length; i++) {
+            for (let j = i + 1; j < teams.length; j++) {
+              AppState.groupMatches[groupId].push({
+                team1: i,
+                team2: j,
+                winner: null,
+                played: false
+              });
+            }
           }
         }
+
+        const matches = AppState.groupMatches[groupId];
+        const completedCount = matches.filter(m => m.played).length;
+
+        let html = `
+          <div style="margin-bottom:12px; padding:8px 12px; background:rgba(59,130,246,0.1); border-radius:6px; font-size:0.85rem; color:#93c5fd; display:flex; justify-content:space-between; align-items:center;">
+            <span>Group ${groupId} Progress: <b>${completedCount} / ${matches.length}</b> matches completed</span>
+            <span>${completedCount === matches.length ? '✅ Complete' : '⏳ In Progress'}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+        `;
+
+        matches.forEach((match, matchIdx) => {
+          const t1 = teams[match.team1];
+          const t2 = teams[match.team2];
+          if (!t1 || !t2) return;
+
+          const isPlayed = match.played;
+          const winnerName = match.winner === 1 ? t1.name : match.winner === 2 ? t2.name : null;
+
+          html += `
+            <div class="match-stats-item" style="border-left: 3px solid ${isPlayed ? 'var(--accent-green)' : 'var(--border-color)'};">
+              <div class="match-info">
+                <div class="match-teams" style="font-size:0.95rem;">
+                  <span style="color: ${match.winner === 1 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 1 ? '700' : '500'};">${t1.name}</span>
+                  <span style="color: var(--text-muted); font-size: 0.8rem; margin: 0 6px;">vs</span>
+                  <span style="color: ${match.winner === 2 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 2 ? '700' : '500'};">${t2.name}</span>
+                </div>
+                <div class="match-group" style="margin-top:4px;">
+                  ${isPlayed ? `<span style="color:var(--accent-green);">✅ Winner: <b>${winnerName}</b></span>` : '<span style="color:var(--text-muted);">⏳ Pending Result</span>'}
+                </div>
+              </div>
+              <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.recordGroupMatch('${groupId}', ${matchIdx})" style="padding:6px 14px; font-size:0.8rem;">
+                ${isPlayed ? '✏️ Edit' : 'Enter Result'}
+              </button>
+            </div>
+          `;
+        });
+
         html += '</div>';
         container.innerHTML = html;
       },
 
-      recordGroupMatch(groupId, team1Idx, team2Idx) {
+      recordGroupMatch(groupId, matchIdx) {
+        const matches = AppState.groupMatches[groupId];
+        const match = matches[matchIdx];
         const teams = AppState.groups[groupId];
-        const team1 = teams[team1Idx];
-        const team2 = teams[team2Idx];
+        const team1 = teams[match.team1];
+        const team2 = teams[match.team2];
 
-        const winner = prompt(`Who won?\n1 - ${team1.name}\n2 - ${team2.name}\nEnter 1 or 2:`);
+        const winner = prompt(`Select the Winner:\n1 - ${team1.name}\n2 - ${team2.name}\n\nEnter 1 or 2:`);
 
         if (winner !== '1' && winner !== '2') {
-          UI.toast("Invalid selection", true);
+          if (winner !== null) UI.toast("Invalid selection", true);
           return;
         }
 
-        // Update stats
-        team1.mp++;
-        team2.mp++;
+        const winnerNum = parseInt(winner);
 
-        if (winner === '1') {
+        // If this match was already played before, undo previous result first
+        if (match.played && match.winner !== null) {
+          if (match.winner === 1) {
+            team1.w--;
+            team1.pts--;
+            team2.l--;
+          } else if (match.winner === 2) {
+            team2.w--;
+            team2.pts--;
+            team1.l--;
+          }
+        } else {
+          // New match being played for first time
+          team1.mp++;
+          team2.mp++;
+        }
+
+        // Apply new result
+        if (winnerNum === 1) {
           team1.w++;
           team1.pts++;
           team2.l++;
@@ -1202,41 +1300,57 @@
           team1.l++;
         }
 
-        // Save and update
+        // Mark match as played and store winner
+        match.winner = winnerNum;
+        match.played = true;
+
+        // Auto-update knockout if all groups complete
         this.updateKnockoutBracket();
+
         DB.save(AppState);
         Renderer.renderAll();
         this.loadGroupMatches();
 
-        UI.toast(`✅ Match result recorded!`);
+        const winningTeam = winnerNum === 1 ? team1.name : team2.name;
+        UI.toast(`✅ Winner recorded: ${winningTeam}`);
       },
 
       updateKnockoutBracket() {
-        // Get top 2 from each group
+        // Only advance teams if ALL matches across all groups are completed
         const qualified = {};
-        ["A", "B", "C", "D"].forEach(gid => {
-          const sorted = [...AppState.groups[gid]].sort((a,b) =>
-            b.pts - a.pts || b.w - a.w || (a.l - b.l)
-          );
-          qualified[gid] = sorted.slice(0, 2).map(t => t.name);
+        const groupOrder = ["A", "B", "C", "D"];
+
+        groupOrder.forEach(gid => {
+          const gTeams = AppState.groups[gid] || [];
+          const gMatches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
+          const isComplete = gMatches.length > 0 && gMatches.every(m => m.played);
+
+          if (isComplete && gTeams.length >= 2) {
+            const sorted = [...gTeams].sort((a,b) =>
+              b.pts - a.pts || b.w - a.w || (a.l - b.l)
+            );
+            qualified[gid] = sorted.slice(0, 2).map(t => t.name);
+          } else {
+            qualified[gid] = [null, null];
+          }
         });
 
-        // Populate quarterfinals
+        // Populate quarterfinals:
         // QF1: A1 vs B2
-        if (qualified.A[0]) AppState.knockout.quarterfinals[0].team1 = qualified.A[0];
-        if (qualified.B[1]) AppState.knockout.quarterfinals[0].team2 = qualified.B[1];
+        AppState.knockout.quarterfinals[0].team1 = qualified.A[0] || null;
+        AppState.knockout.quarterfinals[0].team2 = qualified.B[1] || null;
 
         // QF2: C1 vs D2
-        if (qualified.C[0]) AppState.knockout.quarterfinals[1].team1 = qualified.C[0];
-        if (qualified.D[1]) AppState.knockout.quarterfinals[1].team2 = qualified.D[1];
+        AppState.knockout.quarterfinals[1].team1 = qualified.C[0] || null;
+        AppState.knockout.quarterfinals[1].team2 = qualified.D[1] || null;
 
         // QF3: B1 vs A2
-        if (qualified.B[0]) AppState.knockout.quarterfinals[2].team1 = qualified.B[0];
-        if (qualified.A[1]) AppState.knockout.quarterfinals[2].team2 = qualified.A[1];
+        AppState.knockout.quarterfinals[2].team1 = qualified.B[0] || null;
+        AppState.knockout.quarterfinals[2].team2 = qualified.A[1] || null;
 
         // QF4: D1 vs C2
-        if (qualified.D[0]) AppState.knockout.quarterfinals[3].team1 = qualified.D[0];
-        if (qualified.C[1]) AppState.knockout.quarterfinals[3].team2 = qualified.C[1];
+        AppState.knockout.quarterfinals[3].team1 = qualified.D[0] || null;
+        AppState.knockout.quarterfinals[3].team2 = qualified.C[1] || null;
       },
 
       // ── Knockout Stage Match Management ──
