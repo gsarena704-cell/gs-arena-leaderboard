@@ -760,9 +760,18 @@
     let isFirebaseReady = false;
 
     // ─────────────────────────────────────────────────────────────
-    // DEFAULT DATA
+    // DEFAULT DATA & LOCAL BACKUP
     // ─────────────────────────────────────────────────────────────
     function getDefaultTournamentState() {
+      // Check for local backup first so refresh never wipes data
+      const backup = localStorage.getItem("gs_arena_backup");
+      if (backup) {
+        try {
+          const parsed = JSON.parse(backup);
+          if (parsed && parsed.groups) return parsed;
+        } catch(e) {}
+      }
+
       return {
         lastUpdated: new Date().toISOString(),
         groups: {
@@ -865,6 +874,11 @@
       save(data) {
         data.lastUpdated = new Date().toISOString();
         AppState = data;
+        // Always save to localStorage backup so data survives refresh
+        try {
+          localStorage.setItem("gs_arena_backup", JSON.stringify(data));
+        } catch(e) {}
+
         if (isFirebaseReady && firebaseDB) {
           firebaseDB.ref(DB_PATH).set(data)
             .then(() => console.log("✅ Synced to Firebase"))
@@ -1048,7 +1062,11 @@
       },
 
       // ── Manual Team Registration ──
-      registry: [],
+      registry: JSON.parse(localStorage.getItem('gs_arena_registry') || '[]'),
+
+      saveRegistry() {
+        localStorage.setItem('gs_arena_registry', JSON.stringify(this.registry));
+      },
 
       addTeamToRegistry() {
         const teamName = document.getElementById("regTeamName").value.trim();
@@ -1078,6 +1096,7 @@
         };
 
         this.registry.push(team);
+        this.saveRegistry();
 
         // Clear form
         document.getElementById("regTeamName").value = "";
@@ -1117,6 +1136,7 @@
         const team = this.registry[idx];
         if (confirm(`Remove "${team.name}" from registry?`)) {
           this.registry.splice(idx, 1);
+          this.saveRegistry();
           this.renderRegistryList();
           UI.toast(`Removed "${team.name}"`);
         }
@@ -1128,8 +1148,15 @@
           return;
         }
 
-        if (!confirm(`Publish ${this.registry.length} teams to the tournament? They will be randomly assigned to groups.`)) {
-          return;
+        const currentTotal = Object.values(AppState.groups).reduce((acc, g) => acc + g.length, 0);
+        if (currentTotal > 0) {
+          if (!confirm(`WARNING: There are already ${currentTotal} teams in groups!\n\nIf you click OK, the existing groups and match stats will be WIPED and completely replaced with the new registry teams.\n\nAre you sure you want to REPLACE the tournament?`)) {
+            return;
+          }
+        } else {
+          if (!confirm(`Publish ${this.registry.length} teams to the tournament? They will be randomly assigned to groups.`)) {
+            return;
+          }
         }
 
         // Randomly shuffle teams
@@ -1173,6 +1200,7 @@
 
         // Clear registry
         this.registry = [];
+        this.saveRegistry();
         this.renderRegistryList();
 
         UI.toast(`✅ ${shuffled.length} teams published & randomly assigned!`);
