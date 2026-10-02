@@ -592,6 +592,7 @@
 
         <div class="adm-tabs">
           <button class="adm-tab active" onclick="UI.switchAdminTab('register', this)">📝 Register Teams</button>
+          <button class="adm-tab" onclick="UI.switchAdminTab('editTeams', this)">✏️ Edit Teams</button>
           <button class="adm-tab" onclick="UI.switchAdminTab('matches', this)">⚔️ Match Stats</button>
         </div>
 
@@ -672,6 +673,27 @@
                 🚀 Publish All Teams & Assign Groups
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- 1.5. EDIT TEAMS (PUBLISHED) -->
+        <div class="adm-panel" id="admPanel-editTeams">
+          <div class="adm-sec">
+            <div class="adm-sec-title">✏️ Edit Teams in Groups</div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
+              Edit team names or delete teams after they've been published to groups.
+            </p>
+
+            <label>Select Group</label>
+            <select id="editTeamGroup" onchange="Admin.loadTeamsForEdit()">
+              <option value="">-- Select Group --</option>
+              <option value="A">Group A</option>
+              <option value="B">Group B</option>
+              <option value="C">Group C</option>
+              <option value="D">Group D</option>
+            </select>
+
+            <div id="editTeamsContainer" style="margin-top:16px;"></div>
           </div>
         </div>
 
@@ -1179,6 +1201,102 @@
         this.renderRegistryList();
 
         UI.toast(`✅ ${shuffled.length} teams published & randomly assigned!`);
+      },
+
+      // ── Edit Published Teams ──
+      loadTeamsForEdit() {
+        const groupId = document.getElementById("editTeamGroup").value;
+        const container = document.getElementById("editTeamsContainer");
+
+        if (!groupId) {
+          container.innerHTML = "";
+          return;
+        }
+
+        const teams = AppState.groups[groupId] || [];
+        if (teams.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted);padding:12px;">No teams in this group yet.</p>';
+          return;
+        }
+
+        let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
+        teams.forEach((team, idx) => {
+          html += `
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <div style="flex:1;">
+                <input type="text" id="editTeamInput_${groupId}_${idx}" value="${team.name}" style="margin-bottom:0; font-weight:600;" />
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-green" onclick="Admin.updateTeamName('${groupId}', ${idx})" style="padding:6px 12px; font-size:0.75rem;">
+                  💾 Save
+                </button>
+                <button class="btn btn-danger" onclick="Admin.deleteTeamFromGroup('${groupId}', ${idx})" style="padding:6px 12px; font-size:0.75rem;">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      },
+
+      updateTeamName(groupId, teamIdx) {
+        const input = document.getElementById(`editTeamInput_${groupId}_${teamIdx}`);
+        const newName = input.value.trim();
+
+        if (!newName) {
+          UI.toast("Team name cannot be empty", true);
+          return;
+        }
+
+        const oldName = AppState.groups[groupId][teamIdx].name;
+        AppState.groups[groupId][teamIdx].name = newName;
+
+        DB.save(AppState);
+        Renderer.renderAll();
+        UI.toast(`✓ Team renamed: "${oldName}" → "${newName}"`);
+      },
+
+      deleteTeamFromGroup(groupId, teamIdx) {
+        const team = AppState.groups[groupId][teamIdx];
+        if (!confirm(`Are you sure you want to delete "${team.name}" from Group ${groupId}?\n\nThis will remove the team and regenerate the group matches.`)) {
+          return;
+        }
+
+        // Remove team from group
+        AppState.groups[groupId].splice(teamIdx, 1);
+
+        // Regenerate round-robin matches for this group
+        const gTeams = AppState.groups[groupId];
+        AppState.groupMatches[groupId] = [];
+        for (let i = 0; i < gTeams.length; i++) {
+          for (let j = i + 1; j < gTeams.length; j++) {
+            AppState.groupMatches[groupId].push({
+              team1: i,
+              team2: j,
+              winner: null,
+              played: false
+            });
+          }
+        }
+
+        // Reset stats of remaining teams in this group to keep integrity
+        gTeams.forEach(t => {
+          t.mp = 0;
+          t.w = 0;
+          t.l = 0;
+          t.pts = 0;
+          t.q = false;
+        });
+
+        // Update Knockout Bracket
+        this.updateKnockoutBracket();
+
+        DB.save(AppState);
+        Renderer.renderAll();
+        this.loadTeamsForEdit();
+        UI.toast(`🗑️ Deleted "${team.name}" from Group ${groupId}`);
       },
 
       // ── Group Stage Match Management ──
