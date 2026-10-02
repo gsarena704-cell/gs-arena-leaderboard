@@ -892,11 +892,12 @@
           const card = document.createElement("div");
           card.className = "group-card";
 
-          // Check if all matches in this group have been completed
+          // Ensure group matches are synchronized
+          const gTeams = AppState.groups[gid] || [];
+          const expectedMatches = (gTeams.length * (gTeams.length - 1)) / 2;
           const matches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
-          const totalMatches = matches.length;
           const completedMatches = matches.filter(m => m.played).length;
-          const isGroupComplete = totalMatches > 0 && completedMatches === totalMatches;
+          const isGroupComplete = gTeams.length >= 2 && matches.length === expectedMatches && completedMatches === expectedMatches && expectedMatches > 0;
 
           let rows = "";
           sorted.forEach((t,i) => {
@@ -915,15 +916,7 @@
             </tr>`;
           });
 
-          // Status subtitle
-          let statusText = "Round Robin";
-          if (totalMatches > 0) {
-            statusText = isGroupComplete
-              ? `✅ Complete (${completedMatches}/${totalMatches} matches)`
-              : `⏳ In Progress (${completedMatches}/${totalMatches} matches)`;
-          }
-
-          card.innerHTML = `<div class="group-card-header"><span class="group-card-title">Group ${gid}</span><span class="group-card-subtitle">${statusText}</span></div>
+          card.innerHTML = `<div class="group-card-header"><span class="group-card-title">Group ${gid}</span><span class="group-card-subtitle">Round Robin</span></div>
             <table class="standings-table"><thead><tr><th class="center" style="width:38px">#</th><th>Team</th><th class="center">MP</th><th class="center">W</th><th class="center">L</th><th class="center">PTS</th></tr></thead><tbody>${rows}</tbody></table>`;
           container.appendChild(card);
         });
@@ -1335,21 +1328,33 @@
           return;
         }
 
-        // Ensure groupMatches exists for this group
+        // Ensure groupMatches exists and matches all pairings for the current teams
         if (!AppState.groupMatches) AppState.groupMatches = { A: [], B: [], C: [], D: [] };
-        if (!AppState.groupMatches[groupId] || AppState.groupMatches[groupId].length === 0) {
-          // Initialize if missing
-          AppState.groupMatches[groupId] = [];
+
+        const expectedCount = (teams.length * (teams.length - 1)) / 2;
+        const currentMatches = AppState.groupMatches[groupId] || [];
+
+        // If match count does not match the actual round-robin combinations, regenerate while preserving valid played matches
+        if (currentMatches.length !== expectedCount) {
+          const newMatches = [];
           for (let i = 0; i < teams.length; i++) {
             for (let j = i + 1; j < teams.length; j++) {
-              AppState.groupMatches[groupId].push({
-                team1: i,
-                team2: j,
-                winner: null,
-                played: false
-              });
+              // Find if this exact pairing already had a recorded result
+              const existing = currentMatches.find(m => m.team1 === i && m.team2 === j);
+              if (existing) {
+                newMatches.push(existing);
+              } else {
+                newMatches.push({
+                  team1: i,
+                  team2: j,
+                  winner: null,
+                  played: false
+                });
+              }
             }
           }
+          AppState.groupMatches[groupId] = newMatches;
+          DB.save(AppState);
         }
 
         const matches = AppState.groupMatches[groupId];
@@ -1358,7 +1363,7 @@
         let html = `
           <div style="margin-bottom:12px; padding:8px 12px; background:rgba(59,130,246,0.1); border-radius:6px; font-size:0.85rem; color:#93c5fd; display:flex; justify-content:space-between; align-items:center;">
             <span>Group ${groupId} Progress: <b>${completedCount} / ${matches.length}</b> matches completed</span>
-            <span>${completedCount === matches.length ? '✅ Complete' : '⏳ In Progress'}</span>
+            <span>${completedCount === matches.length && matches.length > 0 ? '✅ Group Complete' : '⏳ In Progress'}</span>
           </div>
           <div style="display:flex; flex-direction:column; gap:10px;">
         `;
@@ -1374,6 +1379,9 @@
           html += `
             <div class="match-stats-item" style="border-left: 3px solid ${isPlayed ? 'var(--accent-green)' : 'var(--border-color)'};">
               <div class="match-info">
+                <div style="font-size:0.75rem; font-weight:700; color:var(--accent-gold); margin-bottom:2px;">
+                  Match ${matchIdx + 1}
+                </div>
                 <div class="match-teams" style="font-size:0.95rem;">
                   <span style="color: ${match.winner === 1 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 1 ? '700' : '500'};">${t1.name}</span>
                   <span style="color: var(--text-muted); font-size: 0.8rem; margin: 0 6px;">vs</span>
@@ -1384,7 +1392,7 @@
                 </div>
               </div>
               <div style="display:flex; gap:6px;">
-                <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.showMatchEditModal('${groupId}', ${matchIdx}, '${t1.name}', '${t2.name}')" style="padding:6px 14px; font-size:0.8rem; min-width:120px;">
+                <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.showMatchEditModal('${groupId}', ${matchIdx}, '${t1.name.replace(/'/g, "\\'")}', '${t2.name.replace(/'/g, "\\'")}')" style="padding:6px 14px; font-size:0.8rem; min-width:120px;">
                   ${isPlayed ? '✏️ Edit' : 'Enter Result'}
                 </button>
               </div>
