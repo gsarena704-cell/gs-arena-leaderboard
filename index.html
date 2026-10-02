@@ -456,13 +456,6 @@
       background: #0d111d; padding: 3px 8px; border-radius: 4px;
     }
 
-    .conn-status-bar {
-      text-align: center; padding: 6px; font-size: 0.78rem; font-weight: 700;
-    }
-    .conn-status-bar.connected { background: rgba(16,185,129,0.1); color: #34d399; }
-    .conn-status-bar.disconnected { background: rgba(239,68,68,0.1); color: #f87171; }
-    .conn-status-bar.offline { background: rgba(100,116,139,0.1); color: #94a3b8; }
-
     .match-stats-item {
       background: #151c2c; padding: 14px; border-radius: 6px;
       margin-bottom: 10px; border: 1px solid #232f48;
@@ -483,9 +476,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Connection status -->
-  <div class="conn-status-bar" id="connBar"></div>
 
   <!-- ─── TOP NAVBAR ──────────────────────────────── -->
   <header class="navbar">
@@ -853,25 +843,18 @@
     }
 
     function setConnectionUI(state) {
-      const bar = document.getElementById("connBar");
       const pill = document.getElementById("livePill");
       const label = document.getElementById("liveLabel");
       const sync = document.getElementById("syncStatus");
 
       if (state === "connected") {
-        bar.className = "conn-status-bar connected";
-        bar.textContent = "🟢 Connected to Live Server — Audience sees updates instantly";
         pill.className = "live-pill";
         label.textContent = "LIVE";
         sync.textContent = "Connected";
       } else if (state === "disconnected") {
-        bar.className = "conn-status-bar disconnected";
-        bar.textContent = "🔴 Connection lost — Reconnecting…";
         pill.className = "live-pill";
         label.textContent = "RECONNECTING";
       } else {
-        bar.className = "conn-status-bar offline";
-        bar.textContent = "⚪ Offline Mode — Set up Firebase for live audience sharing";
         pill.className = "live-pill offline-pill";
         label.textContent = "OFFLINE";
         sync.textContent = "Local Only";
