@@ -1400,9 +1400,11 @@
                   ${isPlayed ? `<span style="color:var(--accent-green);">✅ Winner: <b>${winnerName}</b></span>` : '<span style="color:var(--text-muted);">⏳ Pending Result</span>'}
                 </div>
               </div>
-              <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.recordGroupMatch('${groupId}', ${matchIdx})" style="padding:6px 14px; font-size:0.8rem;">
-                ${isPlayed ? '✏️ Edit' : 'Enter Result'}
-              </button>
+              <div style="display:flex; gap:6px;">
+                <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.showMatchEditModal('${groupId}', ${matchIdx}, '${t1.name}', '${t2.name}')" style="padding:6px 14px; font-size:0.8rem; min-width:120px;">
+                  ${isPlayed ? '✏️ Edit' : 'Enter Result'}
+                </button>
+              </div>
             </div>
           `;
         });
@@ -1411,21 +1413,60 @@
         container.innerHTML = html;
       },
 
-      recordGroupMatch(groupId, matchIdx) {
+      showMatchEditModal(groupId, matchIdx, team1Name, team2Name) {
+        const match = AppState.groupMatches[groupId][matchIdx];
+
+        // Create modal HTML
+        const modalHtml = `
+          <div style="background:#131826; border:1px solid var(--border-color); border-radius:12px; padding:24px; width:min(500px, 90vw);">
+            <div style="margin-bottom:20px;">
+              <h3 style="margin:0 0 8px 0; color:var(--accent-blue);">Select Winner</h3>
+              <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">${team1Name} vs ${team2Name}</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+              <button class="btn btn-blue" onclick="Admin.confirmMatchResult('${groupId}', ${matchIdx}, 1)" style="padding:16px; font-size:1rem; font-weight:700;">
+                🏆 ${team1Name}
+              </button>
+              <button class="btn btn-blue" onclick="Admin.confirmMatchResult('${groupId}', ${matchIdx}, 2)" style="padding:16px; font-size:1rem; font-weight:700;">
+                🏆 ${team2Name}
+              </button>
+            </div>
+
+            <button class="btn btn-ghost btn-full" onclick="Admin.closeMatchModal()" style="padding:10px; font-size:0.9rem;">
+              Cancel
+            </button>
+          </div>
+        `;
+
+        // Show modal
+        const backdrop = document.createElement('div');
+        backdrop.id = 'matchEditBackdrop';
+        backdrop.style.cssText = `
+          position:fixed; inset:0; background:rgba(0,0,0,0.85);
+          display:flex; align-items:center; justify-content:center;
+          z-index:2000; padding:20px;
+        `;
+        backdrop.innerHTML = modalHtml;
+        document.body.appendChild(backdrop);
+      },
+
+      confirmMatchResult(groupId, matchIdx, winnerNum) {
+        this.recordGroupMatch(groupId, matchIdx, winnerNum);
+        this.closeMatchModal();
+      },
+
+      closeMatchModal() {
+        const backdrop = document.getElementById('matchEditBackdrop');
+        if (backdrop) backdrop.remove();
+      },
+
+      recordGroupMatch(groupId, matchIdx, winnerNum) {
         const matches = AppState.groupMatches[groupId];
         const match = matches[matchIdx];
         const teams = AppState.groups[groupId];
         const team1 = teams[match.team1];
         const team2 = teams[match.team2];
-
-        const winner = prompt(`Select the Winner:\n1 - ${team1.name}\n2 - ${team2.name}\n\nEnter 1 or 2:`);
-
-        if (winner !== '1' && winner !== '2') {
-          if (winner !== null) UI.toast("Invalid selection", true);
-          return;
-        }
-
-        const winnerNum = parseInt(winner);
 
         // If this match was already played before, undo previous result first
         if (match.played && match.winner !== null) {
