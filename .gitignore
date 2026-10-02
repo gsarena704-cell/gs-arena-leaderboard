@@ -1,0 +1,12 @@
+# Sensitive data
+*.pdf
+*Responses*
+
+# Screenshots & images
+*.png
+*.jpg
+*.jpeg
+
+# OS files
+Thumbs.db
+.DS_Store
