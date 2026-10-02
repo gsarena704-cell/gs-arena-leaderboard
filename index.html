@@ -1024,7 +1024,7 @@
         document.getElementById("teamDetailTitle").textContent = t.name;
         let ph = '';
         if (t.players && t.players.length) {
-          t.players.forEach(p => { ph += `<div class="player-roster-item"><span class="player-name">${p.name}${p.uid?' ('+p.uid+')':''}</span><span class="player-role">${p.role}</span></div>`; });
+          t.players.forEach(p => { ph += `<div class="player-roster-item"><span class="player-name">${p.name}</span><span class="player-role">${p.uid ? 'UID: ' + p.uid : ''}</span></div>`; });
         } else { ph = '<p style="color:var(--text-muted);font-size:0.85rem;">No player data.</p>'; }
         document.getElementById("teamDetailContent").innerHTML = `
           <div class="player-roster"><div class="player-roster-title">Player Roster (4v4 Squad)</div>${ph}</div>
@@ -1085,14 +1085,13 @@
           if (name) {
             players.push({
               name: name,
-              uid: uid,
-              role: ["Captain", "Rusher", "Support", "Sniper"][i - 1]
+              uid: uid
             });
           }
         }
 
         if (players.length === 0) {
-          UI.toast("⚠️ Add at least Player 1 (Captain)", true);
+          UI.toast("⚠️ Add at least Player 1", true);
           return;
         }
 
@@ -1226,13 +1225,11 @@
 
           let playersHtml = '';
           for (let p = 0; p < 4; p++) {
-            const player = team.players[p] || { name: "", uid: "", role: "" };
-            const roleLabel = ["Captain", "Rusher", "Support", "Sniper"][p];
+            const player = team.players[p] || { name: "", uid: "" };
             playersHtml += `
-              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:8px;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
                 <input type="text" id="editP_${groupId}_${idx}_${p}_name" value="${player.name || ''}" placeholder="Player ${p + 1} IGN" style="margin-bottom:0; font-size:0.85rem;" />
                 <input type="text" id="editP_${groupId}_${idx}_${p}_uid" value="${player.uid || ''}" placeholder="UID" style="margin-bottom:0; font-size:0.85rem;" />
-                <input type="text" id="editP_${groupId}_${idx}_${p}_role" value="${player.role || roleLabel}" placeholder="${roleLabel}" style="margin-bottom:0; font-size:0.85rem;" />
               </div>
             `;
           }
@@ -1246,10 +1243,9 @@
 
               <label style="margin-bottom:6px;">Player Roster (4 Players)</label>
               <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:6px; margin-bottom:12px;">
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:8px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
                   <span>IGN</span>
                   <span>UID</span>
-                  <span>Role</span>
                 </div>
                 ${playersHtml}
               </div>
@@ -1287,13 +1283,11 @@
         for (let p = 0; p < 4; p++) {
           const nameInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_name`);
           const uidInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_uid`);
-          const roleInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_role`);
 
-          if (!team.players[p]) team.players[p] = { name: "", uid: "", role: "" };
+          if (!team.players[p]) team.players[p] = { name: "", uid: "" };
 
           team.players[p].name = nameInput.value.trim();
           team.players[p].uid = uidInput.value.trim();
-          team.players[p].role = roleInput.value.trim();
         }
 
         DB.save(AppState);
