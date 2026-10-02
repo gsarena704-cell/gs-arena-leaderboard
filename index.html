@@ -1221,17 +1221,45 @@
 
         let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
         teams.forEach((team, idx) => {
-          html += `
-            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
-              <div style="flex:1;">
-                <input type="text" id="editTeamInput_${groupId}_${idx}" value="${team.name}" style="margin-bottom:0; font-weight:600;" />
+          // Ensure players array exists
+          if (!team.players) team.players = [];
+
+          let playersHtml = '';
+          for (let p = 0; p < 4; p++) {
+            const player = team.players[p] || { name: "", uid: "", role: "" };
+            const roleLabel = ["Captain", "Rusher", "Support", "Sniper"][p];
+            playersHtml += `
+              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:8px;">
+                <input type="text" id="editP_${groupId}_${idx}_${p}_name" value="${player.name || ''}" placeholder="Player ${p + 1} IGN" style="margin-bottom:0; font-size:0.85rem;" />
+                <input type="text" id="editP_${groupId}_${idx}_${p}_uid" value="${player.uid || ''}" placeholder="UID" style="margin-bottom:0; font-size:0.85rem;" />
+                <input type="text" id="editP_${groupId}_${idx}_${p}_role" value="${player.role || roleLabel}" placeholder="${roleLabel}" style="margin-bottom:0; font-size:0.85rem;" />
               </div>
-              <div style="display:flex; gap:6px;">
-                <button class="btn btn-green" onclick="Admin.updateTeamName('${groupId}', ${idx})" style="padding:6px 12px; font-size:0.75rem;">
-                  💾 Save
+            `;
+          }
+
+          html += `
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:16px;">
+              <div style="font-weight:700; color:var(--accent-gold); margin-bottom:12px; font-size:0.95rem;">Team ${idx + 1}</div>
+
+              <label style="margin-bottom:6px;">Team Name</label>
+              <input type="text" id="editTeamInput_${groupId}_${idx}" value="${team.name}" style="margin-bottom:12px; font-weight:600;" />
+
+              <label style="margin-bottom:6px;">Player Roster (4 Players)</label>
+              <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:6px; margin-bottom:12px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:8px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                  <span>IGN</span>
+                  <span>UID</span>
+                  <span>Role</span>
+                </div>
+                ${playersHtml}
+              </div>
+
+              <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-green" onclick="Admin.updateTeamData('${groupId}', ${idx})" style="padding:8px 16px; font-size:0.8rem;">
+                  💾 Save Team & Roster
                 </button>
-                <button class="btn btn-danger" onclick="Admin.deleteTeamFromGroup('${groupId}', ${idx})" style="padding:6px 12px; font-size:0.75rem;">
-                  🗑️ Delete
+                <button class="btn btn-danger" onclick="Admin.deleteTeamFromGroup('${groupId}', ${idx})" style="padding:8px 16px; font-size:0.8rem;">
+                  🗑️ Delete Team
                 </button>
               </div>
             </div>
@@ -1241,21 +1269,36 @@
         container.innerHTML = html;
       },
 
-      updateTeamName(groupId, teamIdx) {
-        const input = document.getElementById(`editTeamInput_${groupId}_${teamIdx}`);
-        const newName = input.value.trim();
+      updateTeamData(groupId, teamIdx) {
+        const teamNameInput = document.getElementById(`editTeamInput_${groupId}_${teamIdx}`);
+        const newName = teamNameInput.value.trim();
 
         if (!newName) {
           UI.toast("Team name cannot be empty", true);
           return;
         }
 
-        const oldName = AppState.groups[groupId][teamIdx].name;
-        AppState.groups[groupId][teamIdx].name = newName;
+        const team = AppState.groups[groupId][teamIdx];
+        const oldName = team.name;
+        team.name = newName;
+
+        // Update players
+        if (!team.players) team.players = [];
+        for (let p = 0; p < 4; p++) {
+          const nameInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_name`);
+          const uidInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_uid`);
+          const roleInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_role`);
+
+          if (!team.players[p]) team.players[p] = { name: "", uid: "", role: "" };
+
+          team.players[p].name = nameInput.value.trim();
+          team.players[p].uid = uidInput.value.trim();
+          team.players[p].role = roleInput.value.trim();
+        }
 
         DB.save(AppState);
         Renderer.renderAll();
-        UI.toast(`✓ Team renamed: "${oldName}" → "${newName}"`);
+        UI.toast(`✅ Updated "${oldName}" ${oldName !== newName ? `→ "${newName}"` : ''} with roster`);
       },
 
       deleteTeamFromGroup(groupId, teamIdx) {
