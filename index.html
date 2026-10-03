@@ -1696,7 +1696,7 @@
       drawConnectors() {
         const svg = document.getElementById("bracketConnectorSvg");
         const gridEl = document.getElementById("bracketGrid");
-        if (!svg || !gridEl) return;
+        if (!svg || !gridEl || !gridEl.getBoundingClientRect) return;
         svg.innerHTML = "";
         const grid = gridEl.getBoundingClientRect();
         const line = (a,b,active) => {
@@ -1765,7 +1765,8 @@
         if (panel) panel.classList.add("active");
       },
 
-      showTeamDetail(gid, idx) {
+      
+      showTeamDetail(gid, idx, matchFilter = 'overall') {
         const gTeams = (AppState.groups && AppState.groups[gid]) || [];
         const sorted = [...gTeams].sort((a,b) => b.pts - a.pts || ((b.rw||0) - (b.rl||0)) - ((a.rw||0) - (a.rl||0)) || b.w - a.w || (a.l - b.l));
         const t = sorted[idx];
@@ -1779,7 +1780,7 @@
 
         const playerStatsAccumulator = {};
         (t.players || []).forEach(p => {
-          playerStatsAccumulator[p.name] = { kills: 0, damage: 0, matches: 0 };
+          playerStatsAccumulator[p.name] = { overall: { kills: 0, damage: 0 } };
         });
 
         const teamMatchesSummary = [];
@@ -1795,9 +1796,13 @@
               const myStats = isTeam1 ? m.playerStats.team1 : m.playerStats.team2;
               (myStats || []).forEach(p => {
                 if (playerStatsAccumulator[p.name]) {
-                  playerStatsAccumulator[p.name].kills += (parseInt(p.kills) || 0);
-                  playerStatsAccumulator[p.name].damage += (parseInt(p.damage) || 0);
-                  playerStatsAccumulator[p.name].matches += 1;
+                  playerStatsAccumulator[p.name].overall.kills += (parseInt(p.kills) || 0);
+                  playerStatsAccumulator[p.name].overall.damage += (parseInt(p.damage) || 0);
+
+                  playerStatsAccumulator[p.name][matchId] = {
+                    kills: parseInt(p.kills) || 0,
+                    damage: parseInt(p.damage) || 0
+                  };
                 }
               });
             }
@@ -1812,10 +1817,33 @@
           }
         });
 
+        // ── BUILD TAB BAR ──
+        let tabHtml = `<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px; scrollbar-width:none;">`;
+        tabHtml += `<button class="filter-pill-btn ${matchFilter === 'overall' ? 'active' : ''}" onclick="UI.showTeamDetail('${gid}', ${idx}, 'overall')" style="white-space:nowrap; padding:6px 14px; font-size:0.75rem;">🌟 Overall Stats</button>`;
+        teamMatchesSummary.forEach(ms => {
+          tabHtml += `<button class="filter-pill-btn ${matchFilter === ms.id ? 'active' : ''}" onclick="UI.showTeamDetail('${gid}', ${idx}, '${ms.id}')" style="white-space:nowrap; padding:6px 14px; font-size:0.75rem;">${ms.id} vs ${ms.opponent}</button>`;
+        });
+        tabHtml += `</div>`;
+
+        // ── BUILD ROSTER HTML ──
         let ph = '';
+        let hasFilterStats = false;
+
         if (t.players && t.players.length) {
           t.players.forEach(p => {
-            const st = playerStatsAccumulator[p.name] || { kills: 0, damage: 0 };
+            const statsObj = playerStatsAccumulator[p.name] || {};
+            let st = { kills: 0, damage: 0 };
+
+            if (matchFilter === 'overall') {
+              st = statsObj.overall || st;
+              hasFilterStats = true;
+            } else {
+              if (statsObj[matchFilter]) {
+                st = statsObj[matchFilter];
+                hasFilterStats = true;
+              }
+            }
+
             ph += `
               <div class="player-roster-item" style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -1828,28 +1856,40 @@
                 </div>
               </div>`;
           });
-        } else {
+        }
+
+        if (matchFilter !== 'overall' && !hasFilterStats) {
+           const ms = teamMatchesSummary.find(m => m.id === matchFilter);
+           if (ms && !ms.played) {
+             ph = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem;">⏳ This match is upcoming. No stats yet.</div>`;
+           } else {
+             ph = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem;">No player stats recorded for ${matchFilter}.</div>`;
+           }
+        } else if (!t.players || !t.players.length) {
           ph = '<p style="color:var(--text-muted);font-size:0.85rem;">No player data registered.</p>';
         }
 
+        // ── BUILD MATCH SUMMARY ──
         let matchSummaryHtml = '';
         teamMatchesSummary.forEach(ms => {
+          const isActive = matchFilter === ms.id;
           matchSummaryHtml += `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(0,0,0,0.2); border-radius:6px; margin-bottom:6px; font-size:0.85rem;">
-              <span><b>${ms.id}</b> vs ${ms.opponent}</span>
+            <div onclick="UI.showTeamDetail('${gid}', ${idx}, '${ms.id}')" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:${isActive ? 'rgba(59,130,246,0.15)' : 'rgba(0,0,0,0.2)'}; border:1px solid ${isActive ? 'var(--accent-blue)' : 'transparent'}; border-radius:6px; margin-bottom:6px; font-size:0.85rem; cursor:pointer; transition:all 0.2s;">
+              <span><b style="${isActive ? 'color:#60a5fa;' : ''}">${ms.id}</b> vs ${ms.opponent}</span>
               <span>${ms.played ? (ms.won ? `<b style="color:var(--accent-green)">WON (${ms.score})</b>` : `<b style="color:var(--accent-red)">LOST (${ms.score})</b>`) : '<span style="color:var(--text-muted)">⏳ Upcoming</span>'}</span>
             </div>
           `;
         });
 
         document.getElementById("teamDetailContent").innerHTML = `
+          ${tabHtml}
           <div class="player-roster">
-            <div class="player-roster-title">👥 Squad Roster & Tournament Performance</div>
+            <div class="player-roster-title" style="margin-bottom:12px;">👥 SQUAD ROSTER & ${matchFilter === 'overall' ? 'TOURNAMENT PERFORMANCE' : `${matchFilter} MATCH STATS`}</div>
             ${ph}
           </div>
 
           <div style="margin-top:16px; padding:16px; background:#0d111d; border-radius:8px; border:1px solid var(--border-color);">
-            <div style="font-size:0.82rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:12px;">📊 Group ${gid} Matches (3 Total)</div>
+            <div style="font-size:0.82rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:12px;">📊 Group ${gid} Matches (Click to view stats)</div>
             ${matchSummaryHtml}
           </div>
 
