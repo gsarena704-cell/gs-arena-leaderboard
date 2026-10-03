@@ -641,8 +641,8 @@
           <button class="filter-pill-btn" onclick="Renderer.filterPlayerStatsGroup('D', this)">Group D</button>
         </div>
         <div style="display:flex; gap:8px;">
-          <button class="filter-pill-btn active" id="sortKillsBtn" onclick="Renderer.setPlayerSort('kills')">🎯 Sort by Kills</button>
-          <button class="filter-pill-btn" id="sortDamageBtn" onclick="Renderer.setPlayerSort('damage')">💥 Sort by Damage</button>
+          <button class="filter-pill-btn active" id="sortKillsBtn" onclick="Renderer.setPlayerSort('kills')">Sort by Kills</button>
+          <button class="filter-pill-btn" id="sortDamageBtn" onclick="Renderer.setPlayerSort('damage')">Sort by Damage</button>
         </div>
       </div>
       <div class="group-card" style="padding:0; overflow:hidden;">
@@ -654,8 +654,8 @@
               <th>Team</th>
               <th class="center">Group</th>
               <th class="center">Matches</th>
-              <th class="center" style="color:#ef4444">Kills 🎯</th>
-              <th class="center" style="color:#f59e0b">Damage 💥</th>
+              <th class="center" style="color:#ef4444">Kills</th>
+              <th class="center" style="color:#f59e0b">Damage</th>
               <th class="center">Avg Dmg</th>
             </tr>
           </thead>
@@ -1606,8 +1606,8 @@
                       ${p.name || 'Player'} ${p.uid ? `<span style="color:var(--text-muted);font-size:0.7rem;">(${p.uid})</span>` : ''}
                       ${isMvp ? '<span class="stat-mvp-badge">👑 MVP</span>' : ''}
                     </div>
-                    <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0} 🎯</div>
-                    <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0} 💥</div>
+                    <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0}</div>
+                    <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0}</div>
                   </div>
                 `;
               });
@@ -1626,8 +1626,8 @@
                       ${p.name || 'Player'} ${p.uid ? `<span style="color:var(--text-muted);font-size:0.7rem;">(${p.uid})</span>` : ''}
                       ${isMvp ? '<span class="stat-mvp-badge">👑 MVP</span>' : ''}
                     </div>
-                    <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0} 🎯</div>
-                    <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0} 💥</div>
+                    <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0}</div>
+                    <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0}</div>
                   </div>
                 `;
               });
@@ -1693,8 +1693,8 @@
                     <div class="breakdown-roster-grid">
                       <div class="breakdown-team-roster-box">
                         <div class="breakdown-roster-header">
-                          <span>${t1.name} Roster</span>
-                          <span>${t1TotalKills} Kills | ${t1TotalDmg} Dmg</span>
+                        <span>${t1.name} Roster</span>
+                        <span>${t1TotalKills} Kills | ${t1TotalDmg} Dmg</span>
                         </div>
                         ${t1PlayerRows}
                       </div>
@@ -2039,15 +2039,13 @@
             }
 
             ph += `
-              <div class="player-roster-item" style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="player-roster-item" style="display:grid; grid-template-columns:1fr 60px 80px; gap:10px; align-items:center;">
                 <div>
                   <div class="player-name">${p.name}</div>
                   <div class="player-role">${p.uid ? 'UID: ' + p.uid : 'UID: -'}</div>
                 </div>
-                <div style="display:flex; gap:12px; font-size:0.85rem; font-weight:700;">
-                  <span style="color:#ef4444;">${st.kills} 🎯</span>
-                  <span style="color:#f59e0b;">${st.damage} 💥</span>
-                </div>
+                <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#ef4444;">${st.kills}</div>
+                <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#f59e0b;">${st.damage}</div>
               </div>`;
           });
         }
@@ -2078,7 +2076,12 @@
         document.getElementById("teamDetailContent").innerHTML = `
           ${tabHtml}
           <div class="player-roster">
-            <div class="player-roster-title" style="margin-bottom:12px;">👥 SQUAD ROSTER & ${matchFilter === 'overall' ? 'TOURNAMENT PERFORMANCE' : `${matchFilter} MATCH STATS`}</div>
+            <div class="player-roster-title" style="margin-bottom:8px;">👥 SQUAD ROSTER & ${matchFilter === 'overall' ? 'TOURNAMENT PERFORMANCE' : `${matchFilter} MATCH STATS`}</div>
+            <div style="display:grid; grid-template-columns:1fr 60px 80px; gap:10px; padding:6px 8px; margin-bottom:4px; font-size:0.7rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+              <span>Player</span>
+              <span style="text-align:center; color:#ef4444;">Kills</span>
+              <span style="text-align:center; color:#f59e0b;">Damage</span>
+            </div>
             ${ph}
           </div>
 
@@ -2748,8 +2751,8 @@
                   </div>
                   <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:6px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
                     <span>Player IGN</span>
-                    <span style="text-align:center;">Kills 🎯</span>
-                    <span style="text-align:center;">Damage 💥</span>
+                    <span style="text-align:center;">Kills</span>
+                    <span style="text-align:center;">Damage</span>
                   </div>
                   ${t1Inputs}
                 </div>
@@ -2761,8 +2764,8 @@
                   </div>
                   <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:6px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
                     <span>Player IGN</span>
-                    <span style="text-align:center;">Kills 🎯</span>
-                    <span style="text-align:center;">Damage 💥</span>
+                    <span style="text-align:center;">Kills</span>
+                    <span style="text-align:center;">Damage</span>
                   </div>
                   ${t2Inputs}
                 </div>
