@@ -750,6 +750,18 @@
               Add teams manually here. Teams will be added and distributed across groups when you publish.
             </p>
 
+            
+            <!-- Quick Test Teams Button -->
+            <div style="margin-bottom:20px; padding:14px; background:rgba(59,130,246,0.1); border:1px dashed var(--accent-blue); border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <div>
+                <div style="font-weight:700; color:#93c5fd; font-size:0.9rem;">⚡ Quick Testing Preset</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Instantly populate 16 Free Fire Esports teams (4 per group) with full 4-player rosters.</div>
+              </div>
+              <button class="btn btn-blue" onclick="Admin.load16DemoTeams()" style="padding:8px 16px; font-size:0.85rem;">
+                ⚡ Load 16 Test Teams
+              </button>
+            </div>
+
             <!-- Team Registration Form -->
             <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:8px; margin-bottom:20px;">
               <h4 style="margin:0 0 12px 0; color:var(--accent-gold);">➕ Add New Team</h4>
@@ -926,19 +938,198 @@
     // ─────────────────────────────────────────────────────────────
     // DEFAULT DATA & LOCAL BACKUP
     // ─────────────────────────────────────────────────────────────
+    
+    const DEMO_16_TEAMS = [
+      {
+        name: "Total Gaming",
+        players: [
+          { name: "TG_FozyAjay", uid: "102938471" },
+          { name: "TG_Mafia", uid: "293847102" },
+          { name: "TG_Javaboy", uid: "384710293" },
+          { name: "TG_Prince", uid: "471029384" }
+        ]
+      },
+      {
+        name: "GodLike Esports",
+        players: [
+          { name: "GOD_Nayeem", uid: "582910394" },
+          { name: "GOD_Ginotra", uid: "693021485" },
+          { name: "GOD_Aman", uid: "704132596" },
+          { name: "GOD_Akash", uid: "815243607" }
+        ]
+      },
+      {
+        name: "Team Elite",
+        players: [
+          { name: "TE_Killer", uid: "926354718" },
+          { name: "TE_Pahadi", uid: "137465829" },
+          { name: "TE_Iconic", uid: "248576930" },
+          { name: "TE_RDP", uid: "359687041" }
+        ]
+      },
+      {
+        name: "TSM FTX",
+        players: [
+          { name: "TSM_OldMonk", uid: "460798152" },
+          { name: "TSM_MrJayYT", uid: "571809263" },
+          { name: "TSM_Indro", uid: "682910374" },
+          { name: "TSM_Illu", uid: "793021485" }
+        ]
+      },
+      {
+        name: "Orangutan Elite",
+        players: [
+          { name: "OG_Dev", uid: "804132596" },
+          { name: "OG_Taneja", uid: "915243607" },
+          { name: "OG_Frost", uid: "126354718" },
+          { name: "OG_Viper", uid: "237465829" }
+        ]
+      },
+      {
+        name: "Chemin Esports",
+        players: [
+          { name: "CHM_Radhetkr", uid: "348576930" },
+          { name: "CHM_Anand", uid: "459687041" },
+          { name: "CHM_Swastik", uid: "560798152" },
+          { name: "CHM_Bheem", uid: "671809263" }
+        ]
+      },
+      {
+        name: "Nigma Galaxy",
+        players: [
+          { name: "NG_Tahil", uid: "782910374" },
+          { name: "NG_Soham", uid: "893021485" },
+          { name: "NG_Vasiyo", uid: "904132596" },
+          { name: "NG_Archie", uid: "115243607" }
+        ]
+      },
+      {
+        name: "Enigma Gaming",
+        players: [
+          { name: "EG_Rawknee", uid: "226354718" },
+          { name: "EG_Godku", uid: "337465829" },
+          { name: "EG_Sensei", uid: "448576930" },
+          { name: "EG_Delta", uid: "559687041" }
+        ]
+      },
+      {
+        name: "Hyderabad Hydras",
+        players: [
+          { name: "HH_Viper", uid: "660798152" },
+          { name: "HH_Dynamo", uid: "771809263" },
+          { name: "HH_Shadow", uid: "882910374" },
+          { name: "HH_Carry", uid: "993021485" }
+        ]
+      },
+      {
+        name: "Revenant Esports",
+        players: [
+          { name: "RVT_Aaru", uid: "104132596" },
+          { name: "RVT_Paradox", uid: "215243607" },
+          { name: "RVT_Falcon", uid: "326354718" },
+          { name: "RVT_Shadow", uid: "437465829" }
+        ]
+      },
+      {
+        name: "Blind Esports",
+        players: [
+          { name: "BLIND_Spooky", uid: "548576930" },
+          { name: "BLIND_Joker", uid: "659687041" },
+          { name: "BLIND_Blaze", uid: "760798152" },
+          { name: "BLIND_Hunter", uid: "871809263" }
+        ]
+      },
+      {
+        name: "7Sea Esports",
+        players: [
+          { name: "7S_Bhavin", uid: "982910374" },
+          { name: "7S_Aryan", uid: "193021485" },
+          { name: "7S_Rohit", uid: "204132596" },
+          { name: "7S_Yash", uid: "315243607" }
+        ]
+      },
+      {
+        name: "Desi Gamers",
+        players: [
+          { name: "DG_AmitBhai", uid: "426354718" },
+          { name: "DG_Romeo", uid: "537465829" },
+          { name: "DG_Survivor", uid: "648576930" },
+          { name: "DG_Jonty", uid: "759687041" }
+        ]
+      },
+      {
+        name: "Total Havoc",
+        players: [
+          { name: "TH_Thunder", uid: "860798152" },
+          { name: "TH_Psycho", uid: "971809263" },
+          { name: "TH_Ghost", uid: "182910374" },
+          { name: "TH_Venom", uid: "293021485" }
+        ]
+      },
+      {
+        name: "Galaxy Racer",
+        players: [
+          { name: "GXR_Zenix", uid: "304132596" },
+          { name: "GXR_Kronos", uid: "415243607" },
+          { name: "GXR_Titan", uid: "526354718" },
+          { name: "GXR_Stryker", uid: "637465829" }
+        ]
+      },
+      {
+        name: "Team Insane",
+        players: [
+          { name: "INS_MadMax", uid: "748576930" },
+          { name: "INS_Reaper", uid: "859687041" },
+          { name: "INS_Beast", uid: "960798152" },
+          { name: "INS_Apex", uid: "171809263" }
+        ]
+      }
+    ];
+
     function getDefaultTournamentState() {
       const backup = localStorage.getItem("gs_arena_backup");
       if (backup) {
         try {
           const parsed = JSON.parse(backup);
-          if (parsed && parsed.groups) return parsed;
+          if (parsed && parsed.groups && Object.values(parsed.groups).some(g => g.length > 0)) return parsed;
         } catch(e) {}
       }
 
+      // Initialize with 16 demo teams (4 per group)
+      const groups = {
+        A: DEMO_16_TEAMS.slice(0, 4).map(t => ({ ...t, mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false })),
+        B: DEMO_16_TEAMS.slice(4, 8).map(t => ({ ...t, mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false })),
+        C: DEMO_16_TEAMS.slice(8, 12).map(t => ({ ...t, mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false })),
+        D: DEMO_16_TEAMS.slice(12, 16).map(t => ({ ...t, mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false }))
+      };
+
+      const groupMatches = { A: [], B: [], C: [], D: [] };
+      const standardPairs = [[0,1], [2,3], [0,2], [1,3], [0,3], [1,2]];
+
+      ["A", "B", "C", "D"].forEach(gid => {
+        standardPairs.forEach((pair, idx) => {
+          const t1 = groups[gid][pair[0]];
+          const t2 = groups[gid][pair[1]];
+          groupMatches[gid].push({
+            id: `M${idx + 1}`,
+            team1: pair[0],
+            team2: pair[1],
+            winner: null,
+            played: false,
+            score1: null,
+            score2: null,
+            playerStats: {
+              team1: (t1.players || []).map(p => ({ name: p.name, uid: p.uid || '', kills: 0, damage: 0 })),
+              team2: (t2.players || []).map(p => ({ name: p.name, uid: p.uid || '', kills: 0, damage: 0 }))
+            }
+          });
+        });
+      });
+
       return {
         lastUpdated: new Date().toISOString(),
-        groups: { A: [], B: [], C: [], D: [] },
-        groupMatches: { A: [], B: [], C: [], D: [] },
+        groups: groups,
+        groupMatches: groupMatches,
         knockout: {
           quarterfinals: [
             { id:"QF1", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
@@ -1728,6 +1919,36 @@
 
       // ── Manual Team Registration ──
       registry: JSON.parse(localStorage.getItem('gs_arena_registry') || '[]'),
+
+      
+      load16DemoTeams() {
+        if (!confirm("Load 16 Free Fire Esports test teams (4 groups of 4) into the tournament?")) return;
+
+        this.registry = [];
+        DEMO_16_TEAMS.forEach(team => {
+          this.registry.push(JSON.parse(JSON.stringify(team)));
+        });
+        this.saveRegistry();
+
+        // Also directly populate and publish into groups A, B, C, D
+        AppState.groups = {
+          A: DEMO_16_TEAMS.slice(0, 4).map(t => ({ ...JSON.parse(JSON.stringify(t)), mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false })),
+          B: DEMO_16_TEAMS.slice(4, 8).map(t => ({ ...JSON.parse(JSON.stringify(t)), mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false })),
+          C: DEMO_16_TEAMS.slice(8, 12).map(t => ({ ...JSON.parse(JSON.stringify(t)), mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false })),
+          D: DEMO_16_TEAMS.slice(12, 16).map(t => ({ ...JSON.parse(JSON.stringify(t)), mp: 0, w: 0, l: 0, pts: 0, rw: 0, rl: 0, q: false }))
+        };
+
+        ["A", "B", "C", "D"].forEach(gid => {
+          this.syncGroupMatches(gid);
+          this.recalculateGroupStandings(gid);
+        });
+
+        this.updateKnockoutBracket();
+        DB.save(AppState);
+        Renderer.renderAll();
+        this.renderRegistryList();
+        UI.toast("✅ Loaded 16 Test Teams across 4 Groups with M1-M6 Matches!");
+      },
 
       saveRegistry() {
         localStorage.setItem('gs_arena_registry', JSON.stringify(this.registry));
