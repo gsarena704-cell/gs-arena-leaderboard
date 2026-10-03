@@ -3097,11 +3097,16 @@
             </div>
 
             <!-- Action Buttons -->
-            <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border-color); padding-top:16px;">
-              <button class="btn btn-ghost" onclick="Admin.closeKnockoutModal()" style="padding:10px 20px;">Cancel</button>
-              <button class="btn btn-blue" onclick="Admin.saveKnockoutMatch('${stage}', ${idx})" style="padding:10px 24px;">
-                💾 Save Match Result
+            <div style="display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--border-color); padding-top:16px;">
+              <button class="btn btn-danger" onclick="Admin.deleteKnockoutMatch('${stage}', ${idx})" style="padding:10px 20px;">
+                🗑️ Clear Entry
               </button>
+              <div style="display:flex; gap:10px;">
+                <button class="btn btn-ghost" onclick="Admin.closeKnockoutModal()" style="padding:10px 20px;">Cancel</button>
+                <button class="btn btn-blue" onclick="Admin.saveKnockoutMatch('${stage}', ${idx})" style="padding:10px 24px;">
+                  💾 Save Match Result
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -3197,6 +3202,68 @@
         this.loadKnockoutMatches();
         this.closeKnockoutModal();
         UI.toast(`✅ Match recorded! Winner: ${winnerName}`);
+      },
+
+      deleteKnockoutMatch(stage, idx) {
+        if (!confirm("⚠️ Are you sure you want to clear this match entry?\n\nThis will reset the scores and winner for this match.")) return;
+
+        const match = stage === 'thirdPlace' || stage === 'final'
+          ? AppState.knockout[stage]
+          : AppState.knockout[stage][idx];
+
+        const oldWinner = match.winner;
+        const winnerName = oldWinner === 1 ? match.team1 : oldWinner === 2 ? match.team2 : null;
+
+        // Clear match data
+        match.winner = null;
+        match.score1 = null;
+        match.score2 = null;
+        match.status = "Upcoming";
+
+        // Clear dependent stages if this was already completed
+        if (stage === 'quarterfinals' && oldWinner) {
+          // Clear the corresponding semifinal slot
+          if (idx === 0 || idx === 1) {
+            AppState.knockout.semifinals[0]['team' + (idx + 1)] = null;
+          } else {
+            AppState.knockout.semifinals[1]['team' + (idx - 1)] = null;
+          }
+          // Also clear semifinal winners if they existed
+          AppState.knockout.semifinals.forEach(sf => {
+            sf.winner = null;
+            sf.score1 = null;
+            sf.score2 = null;
+          });
+          // Clear final and third place
+          AppState.knockout.final.winner = null;
+          AppState.knockout.final.team1 = null;
+          AppState.knockout.final.team2 = null;
+          AppState.knockout.thirdPlace.winner = null;
+          AppState.knockout.thirdPlace.team1 = null;
+          AppState.knockout.thirdPlace.team2 = null;
+        } else if (stage === 'semifinals' && oldWinner) {
+          // Clear final and third place slots
+          if (idx === 0) {
+            AppState.knockout.final.team1 = null;
+            AppState.knockout.thirdPlace.team1 = null;
+          } else {
+            AppState.knockout.final.team2 = null;
+            AppState.knockout.thirdPlace.team2 = null;
+          }
+          // Clear final and third place results
+          AppState.knockout.final.winner = null;
+          AppState.knockout.final.score1 = null;
+          AppState.knockout.final.score2 = null;
+          AppState.knockout.thirdPlace.winner = null;
+          AppState.knockout.thirdPlace.score1 = null;
+          AppState.knockout.thirdPlace.score2 = null;
+        }
+
+        DB.save(AppState);
+        Renderer.renderAll();
+        this.loadKnockoutMatches();
+        this.closeKnockoutModal();
+        UI.toast(`🗑️ Match entry cleared!`);
       }
     };
 
