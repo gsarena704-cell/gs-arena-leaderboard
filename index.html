@@ -2761,21 +2761,29 @@
           const players = teamObj.players || [];
           const existingList = pStats[teamKey] || [];
 
-          for (let p = 0; p < 4; p++) {
-            const player = players[p] || { name: `Player ${p+1}`, uid: '' };
+          // 4 main players + 1 substitute
+          for (let p = 0; p < 5; p++) {
+            const isSub = p === 4;
+            const player = players[p] || { name: isSub ? 'Substitute' : `Player ${p+1}`, uid: '', substitute: isSub };
             const stat = existingList.find(s => s.name === player.name) || existingList[p] || { kills: 0, damage: 0 };
 
+            const borderTop = isSub ? 'margin-top:12px; padding-top:8px; border-top: 1px dashed #f59e0b;' : '';
+            const subLabel = isSub ? '<div style="font-size:0.7rem; color:#f59e0b; font-weight:700; margin-bottom:6px;">⭐ SUBSTITUTE (Optional)</div>' : '';
+
             rows += `
-              <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:8px; align-items:center;">
-                <div>
-                  <input type="text" id="${teamKey}_p${p}_name" value="${player.name}" placeholder="IGN" style="margin-bottom:0; font-size:0.85rem; font-weight:600;" />
-                  <input type="hidden" id="${teamKey}_p${p}_uid" value="${player.uid || ''}" />
-                </div>
-                <div>
-                  <input type="number" id="${teamKey}_p${p}_kills" min="0" value="${stat.kills || 0}" placeholder="Kills" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
-                </div>
-                <div>
-                  <input type="number" id="${teamKey}_p${p}_damage" min="0" value="${stat.damage || 0}" placeholder="Damage" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+              <div style="${borderTop}">
+                ${subLabel}
+                <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:8px; align-items:center;">
+                  <div>
+                    <input type="text" id="${teamKey}_p${p}_name" value="${player.name || ''}" placeholder="${isSub ? 'Sub IGN (optional)' : 'IGN'}" style="margin-bottom:0; font-size:0.85rem; font-weight:600;" />
+                    <input type="hidden" id="${teamKey}_p${p}_uid" value="${player.uid || ''}" />
+                  </div>
+                  <div>
+                    <input type="number" id="${teamKey}_p${p}_kills" min="0" value="${stat.kills || 0}" placeholder="Kills" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+                  </div>
+                  <div>
+                    <input type="number" id="${teamKey}_p${p}_damage" min="0" value="${stat.damage || 0}" placeholder="Damage" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+                  </div>
                 </div>
               </div>
             `;
@@ -2920,9 +2928,9 @@
           return;
         }
 
-        // Collect player stats for team 1
+        // Collect player stats for team 1 (4 main + 1 substitute)
         const t1Stats = [];
-        for (let p = 0; p < 4; p++) {
+        for (let p = 0; p < 5; p++) {
           const nameEl = document.getElementById(`team1_p${p}_name`);
           const uidEl = document.getElementById(`team1_p${p}_uid`);
           const killsEl = document.getElementById(`team1_p${p}_kills`);
@@ -2933,14 +2941,15 @@
               name: nameEl.value.trim(),
               uid: uidEl ? uidEl.value.trim() : '',
               kills: parseInt(killsEl ? killsEl.value : 0) || 0,
-              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0,
+              substitute: (p === 4)
             });
           }
         }
 
-        // Collect player stats for team 2
+        // Collect player stats for team 2 (4 main + 1 substitute)
         const t2Stats = [];
-        for (let p = 0; p < 4; p++) {
+        for (let p = 0; p < 5; p++) {
           const nameEl = document.getElementById(`team2_p${p}_name`);
           const uidEl = document.getElementById(`team2_p${p}_uid`);
           const killsEl = document.getElementById(`team2_p${p}_kills`);
@@ -2951,7 +2960,8 @@
               name: nameEl.value.trim(),
               uid: uidEl ? uidEl.value.trim() : '',
               kills: parseInt(killsEl ? killsEl.value : 0) || 0,
-              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0,
+              substitute: (p === 4)
             });
           }
         }
