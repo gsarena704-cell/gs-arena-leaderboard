@@ -450,7 +450,23 @@
       padding: 10px; background: #1a2233; border-radius: 6px;
       margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
     }
-    .player-name { font-weight: 600; color: var(--text-main); }
+    .player-name {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+    .player-stats-row {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      gap: 12px;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: #93c5fd;
+    }
     .player-role {
       font-size: 0.75rem; color: var(--text-muted);
       background: #0d111d; padding: 3px 8px; border-radius: 4px;
@@ -810,6 +826,20 @@
                 <div>
                   <label>UID</label>
                   <input type="text" id="regP4UID" placeholder="Free Fire UID" />
+                </div>
+              </div>
+
+              <div style="margin-top:14px; padding-top:14px; border-top: 1px dashed #f59e0b;">
+                <div style="font-size:0.75rem; color:#f59e0b; font-weight:700; margin-bottom:8px;">⭐ SUBSTITUTE PLAYER (Optional)</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                  <div>
+                    <label>Substitute - IGN</label>
+                    <input type="text" id="regP5Name" placeholder="In-Game Name (optional)" />
+                  </div>
+                  <div>
+                    <label>UID</label>
+                    <input type="text" id="regP5UID" placeholder="Free Fire UID" />
+                  </div>
                 </div>
               </div>
 
@@ -2024,7 +2054,10 @@
         let hasFilterStats = false;
 
         if (t.players && t.players.length) {
-          t.players.forEach(p => {
+          const mainPlayers = t.players.filter(p => !p.substitute);
+          const subPlayer = t.players.find(p => p.substitute && p.name);
+
+          mainPlayers.forEach(p => {
             const statsObj = playerStatsAccumulator[p.name] || {};
             let st = { kills: 0, damage: 0 };
 
@@ -2042,12 +2075,49 @@
               <div class="player-roster-item" style="display:grid; grid-template-columns:1fr 60px 80px; gap:10px; align-items:center;">
                 <div>
                   <div class="player-name">${p.name}</div>
+                  <div style="display:flex; gap:10px; font-size:0.7rem; color:var(--text-muted);">
+                    <span>K/D: <span style="color:#60a5fa; font-weight:700;">${st.damage ? (st.kills/st.damage).toFixed(2) : (st.kills ? st.kills.toFixed(2) : '0.00')}</span></span>
+                    <span>Avg Dmg: <span style="color:#f59e0b; font-weight:700;">${st.damage}</span></span>
+                  </div>
                   <div class="player-role">${p.uid ? 'UID: ' + p.uid : 'UID: -'}</div>
                 </div>
                 <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#ef4444;">${st.kills}</div>
                 <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#f59e0b;">${st.damage}</div>
               </div>`;
           });
+
+          // Add substitute player if exists
+          if (subPlayer) {
+            const statsObj = playerStatsAccumulator[subPlayer.name] || {};
+            let st = { kills: 0, damage: 0 };
+
+            if (matchFilter === 'overall') {
+              st = statsObj.overall || st;
+              hasFilterStats = true;
+            } else {
+              if (statsObj[matchFilter]) {
+                st = statsObj[matchFilter];
+                hasFilterStats = true;
+              }
+            }
+
+            ph += `
+              <div style="margin-top:10px; padding-top:10px; border-top: 1px dashed rgba(245,158,11,0.4);">
+                <div style="font-size:0.7rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">⭐ Substitute</div>
+                <div class="player-roster-item" style="display:grid; grid-template-columns:1fr 60px 80px; gap:10px; align-items:center; border-left: 3px solid #f59e0b; opacity:0.85; padding-left:8px;">
+                  <div>
+                    <div class="player-name">${subPlayer.name}</div>
+                    <div style="display:flex; gap:10px; font-size:0.7rem; color:var(--text-muted);">
+                      <span>K/D: <span style="color:#60a5fa; font-weight:700;">${st.damage ? (st.kills/st.damage).toFixed(2) : (st.kills ? st.kills.toFixed(2) : '0.00')}</span></span>
+                      <span>Avg Dmg: <span style="color:#f59e0b; font-weight:700;">${st.damage}</span></span>
+                    </div>
+                    <div class="player-role">${subPlayer.uid ? 'UID: ' + subPlayer.uid : 'UID: -'}</div>
+                  </div>
+                  <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#ef4444;">${st.kills}</div>
+                  <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#f59e0b;">${st.damage}</div>
+                </div>
+              </div>`;
+          }
         }
 
         if (matchFilter !== 'overall' && !hasFilterStats) {
@@ -2207,6 +2277,13 @@
           }
         }
 
+        // Add substitute player (5th slot)
+        const subName = document.getElementById("regP5Name").value.trim();
+        const subUid = document.getElementById("regP5UID").value.trim();
+        if (subName) {
+          players.push({ name: subName, uid: subUid, substitute: true });
+        }
+
         if (players.length === 0) {
           UI.toast("⚠️ Add at least Player 1", true);
           return;
@@ -2223,7 +2300,7 @@
 
         // Clear form
         document.getElementById("regTeamName").value = "";
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= 5; i++) {
           document.getElementById(`regP${i}Name`).value = "";
           document.getElementById(`regP${i}UID`).value = "";
         }
@@ -2506,12 +2583,21 @@
         teams.forEach((team, idx) => {
           if (!team.players) team.players = [];
           let playersHtml = '';
-          for (let p = 0; p < 4; p++) {
-            const player = team.players[p] || { name: "", uid: "" };
+
+          // 4 main players + 1 substitute (index 4)
+          for (let p = 0; p < 5; p++) {
+            const isSub = p === 4;
+            const player = team.players[p] || { name: "", uid: "", substitute: isSub };
+            const borderTop = isSub ? 'style="margin-top:12px; padding-top:12px; border-top: 1px dashed #f59e0b;"' : '';
+            const subLabel = isSub ? '<div style="font-size:0.72rem; color:#f59e0b; font-weight:700; margin-bottom:6px;">⭐ SUBSTITUTE SLOT (Optional)</div>' : '';
+
             playersHtml += `
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-                <input type="text" id="editP_${groupId}_${idx}_${p}_name" value="${player.name || ''}" placeholder="Player ${p + 1} IGN" style="margin-bottom:0; font-size:0.85rem;" />
-                <input type="text" id="editP_${groupId}_${idx}_${p}_uid" value="${player.uid || ''}" placeholder="UID" style="margin-bottom:0; font-size:0.85rem;" />
+              <div ${borderTop}>
+                ${subLabel}
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+                  <input type="text" id="editP_${groupId}_${idx}_${p}_name" value="${player.name || ''}" placeholder="${isSub ? 'Substitute IGN (optional)' : 'Player ' + (p + 1) + ' IGN'}" style="margin-bottom:0; font-size:0.85rem;" />
+                  <input type="text" id="editP_${groupId}_${idx}_${p}_uid" value="${player.uid || ''}" placeholder="UID" style="margin-bottom:0; font-size:0.85rem;" />
+                </div>
               </div>
             `;
           }
@@ -2521,7 +2607,7 @@
               <div style="font-weight:700; color:var(--accent-gold); margin-bottom:12px; font-size:0.95rem;">Team ${idx + 1}</div>
               <label style="margin-bottom:6px;">Team Name</label>
               <input type="text" id="editTeamInput_${groupId}_${idx}" value="${team.name}" style="margin-bottom:12px; font-weight:600;" />
-              <label style="margin-bottom:6px;">Player Roster (4 Players)</label>
+              <label style="margin-bottom:6px;">Player Roster (4 Main + 1 Substitute)</label>
               <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:6px; margin-bottom:12px;">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
                   <span>IGN</span>
@@ -2554,12 +2640,14 @@
         team.name = newName;
 
         if (!team.players) team.players = [];
-        for (let p = 0; p < 4; p++) {
+        // Save 5 players (4 main + 1 substitute at index 4)
+        for (let p = 0; p < 5; p++) {
           const nameInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_name`);
           const uidInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_uid`);
-          if (!team.players[p]) team.players[p] = { name: "", uid: "" };
+          if (!team.players[p]) team.players[p] = { name: "", uid: "", substitute: (p === 4) };
           team.players[p].name = nameInput.value.trim();
           team.players[p].uid = uidInput.value.trim();
+          team.players[p].substitute = (p === 4);
         }
 
         this.syncGroupMatches(groupId);
