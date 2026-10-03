@@ -730,6 +730,19 @@
     .player-name {
       font-weight: 600;
       color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+    .player-stats-row {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      gap: 12px;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: #93c5fd;
     }
     .player-role {
       font-size: 0.75rem;
@@ -981,40 +994,44 @@
               name: "Team Phoenix",
               mp: 3, w: 3, d: 0, l: 0, kf: 48, ka: 12, pts: 9, q: true,
               players: [
-                { name: "PhoenixKing", role: "Captain" },
-                { name: "FireStorm", role: "Rusher" },
-                { name: "BlazeMaster", role: "Support" },
-                { name: "WingSniper", role: "Sniper" }
+                { name: "PhoenixKing",  role: "Captain", kills: 18, deaths: 6,  damage: 4200, mp: 3 },
+                { name: "FireStorm",    role: "Rusher",  kills: 14, deaths: 9,  damage: 3100, mp: 3 },
+                { name: "BlazeMaster", role: "Support", kills:  9, deaths: 7,  damage: 2400, mp: 3 },
+                { name: "WingSniper",  role: "Sniper",  kills: 12, deaths: 5,  damage: 3600, mp: 3 },
+                { name: "AshRiser",    role: "Substitute", kills: 4, deaths: 3, damage: 900, mp: 1, substitute: true }
               ]
             },
             {
               name: "Thunder Squad",
               mp: 3, w: 2, d: 0, l: 1, kf: 36, ka: 24, pts: 6, q: true,
               players: [
-                { name: "ThunderBolt", role: "Captain" },
-                { name: "LightningFast", role: "Rusher" },
-                { name: "StormBreaker", role: "Support" },
-                { name: "CloudStrike", role: "Sniper" }
+                { name: "ThunderBolt",   role: "Captain", kills: 13, deaths: 8,  damage: 3000, mp: 3 },
+                { name: "LightningFast", role: "Rusher",  kills: 11, deaths: 10, damage: 2700, mp: 3 },
+                { name: "StormBreaker", role: "Support", kills:  7, deaths: 9,  damage: 2100, mp: 3 },
+                { name: "CloudStrike",  role: "Sniper",  kills: 10, deaths: 6,  damage: 3200, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Night Wolves",
               mp: 3, w: 1, d: 0, l: 2, kf: 28, ka: 32, pts: 3, q: false,
               players: [
-                { name: "AlphaWolf", role: "Captain" },
-                { name: "ShadowHunter", role: "Rusher" },
-                { name: "MoonRaider", role: "Support" },
-                { name: "DarkProwler", role: "Sniper" }
+                { name: "AlphaWolf",    role: "Captain", kills: 10, deaths: 11, damage: 2300, mp: 3 },
+                { name: "ShadowHunter",role: "Rusher",  kills:  8, deaths: 12, damage: 2000, mp: 3 },
+                { name: "MoonRaider",  role: "Support", kills:  6, deaths: 10, damage: 1800, mp: 3 },
+                { name: "DarkProwler", role: "Sniper",  kills:  9, deaths: 8,  damage: 2600, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Desert Eagles",
               mp: 3, w: 0, d: 0, l: 3, kf: 16, ka: 48, pts: 0, q: false,
               players: [
-                { name: "EagleEye", role: "Captain" },
-                { name: "DuneRider", role: "Rusher" },
-                { name: "SandStorm", role: "Support" },
-                { name: "OasisGuard", role: "Sniper" }
+                { name: "EagleEye",   role: "Captain", kills:  5, deaths: 14, damage: 1400, mp: 3 },
+                { name: "DuneRider",  role: "Rusher",  kills:  4, deaths: 13, damage: 1200, mp: 3 },
+                { name: "SandStorm",  role: "Support", kills:  4, deaths: 12, damage: 1300, mp: 3 },
+                { name: "OasisGuard", role: "Sniper",  kills:  6, deaths: 11, damage: 1700, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             }
           ],
@@ -1023,40 +1040,44 @@
               name: "Royal Titans",
               mp: 3, w: 3, d: 0, l: 0, kf: 45, ka: 18, pts: 9, q: true,
               players: [
-                { name: "TitanKing", role: "Captain" },
-                { name: "RoyalGuard", role: "Rusher" },
-                { name: "CrownDefender", role: "Support" },
-                { name: "ThroneSniper", role: "Sniper" }
+                { name: "TitanKing",      role: "Captain", kills: 17, deaths: 6,  damage: 4000, mp: 3 },
+                { name: "RoyalGuard",     role: "Rusher",  kills: 13, deaths: 8,  damage: 3100, mp: 3 },
+                { name: "CrownDefender", role: "Support", kills:  9, deaths: 6,  damage: 2400, mp: 3 },
+                { name: "ThroneSniper",  role: "Sniper",  kills: 12, deaths: 5,  damage: 3500, mp: 3 },
+                { name: "CrownPrince",   role: "Substitute", kills: 3, deaths: 2, damage: 800, mp: 1, substitute: true }
               ]
             },
             {
               name: "Viper Legends",
               mp: 3, w: 2, d: 0, l: 1, kf: 38, ka: 28, pts: 6, q: true,
               players: [
-                { name: "ViperStrike", role: "Captain" },
-                { name: "CobraFang", role: "Rusher" },
-                { name: "VenomBite", role: "Support" },
-                { name: "SerpentAim", role: "Sniper" }
+                { name: "ViperStrike", role: "Captain", kills: 15, deaths: 9,  damage: 3400, mp: 3 },
+                { name: "CobraFang",   role: "Rusher",  kills: 12, deaths: 10, damage: 2900, mp: 3 },
+                { name: "VenomBite",   role: "Support", kills:  8, deaths: 8,  damage: 2100, mp: 3 },
+                { name: "SerpentAim",  role: "Sniper",  kills: 11, deaths: 7,  damage: 3300, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Storm Riders",
               mp: 3, w: 1, d: 0, l: 2, kf: 30, ka: 36, pts: 3, q: false,
               players: [
-                { name: "StormLord", role: "Captain" },
-                { name: "WindRacer", role: "Rusher" },
-                { name: "TempestWing", role: "Support" },
-                { name: "GaleForce", role: "Sniper" }
+                { name: "StormLord",    role: "Captain", kills:  9, deaths: 11, damage: 2200, mp: 3 },
+                { name: "WindRacer",    role: "Rusher",  kills:  8, deaths: 12, damage: 1900, mp: 3 },
+                { name: "TempestWing", role: "Support", kills:  7, deaths: 9,  damage: 2000, mp: 3 },
+                { name: "GaleForce",   role: "Sniper",  kills: 10, deaths: 8,  damage: 2800, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Phantom Kings",
               mp: 3, w: 0, d: 0, l: 3, kf: 20, ka: 44, pts: 0, q: false,
               players: [
-                { name: "PhantomLord", role: "Captain" },
-                { name: "GhostRider", role: "Rusher" },
-                { name: "SpiritWalker", role: "Support" },
-                { name: "SpectreShot", role: "Sniper" }
+                { name: "PhantomLord",   role: "Captain", kills:  5, deaths: 13, damage: 1300, mp: 3 },
+                { name: "GhostRider",    role: "Rusher",  kills:  4, deaths: 11, damage: 1100, mp: 3 },
+                { name: "SpiritWalker", role: "Support", kills:  6, deaths: 12, damage: 1600, mp: 3 },
+                { name: "SpectreShot",  role: "Sniper",  kills:  7, deaths: 10, damage: 2000, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             }
           ],
@@ -1065,40 +1086,44 @@
               name: "Dragon Force",
               mp: 3, w: 2, d: 1, l: 0, kf: 42, ka: 22, pts: 7, q: true,
               players: [
-                { name: "DragonSlayer", role: "Captain" },
-                { name: "FireBreather", role: "Rusher" },
-                { name: "ScaleGuard", role: "Support" },
-                { name: "WyrmSniper", role: "Sniper" }
+                { name: "DragonSlayer",  role: "Captain", kills: 16, deaths: 7,  damage: 3800, mp: 3 },
+                { name: "FireBreather",  role: "Rusher",  kills: 13, deaths: 8,  damage: 3100, mp: 3 },
+                { name: "ScaleGuard",   role: "Support", kills:  8, deaths: 7,  damage: 2200, mp: 3 },
+                { name: "WyrmSniper",   role: "Sniper",  kills: 11, deaths: 6,  damage: 3400, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Shadow Hunters",
               mp: 3, w: 2, d: 0, l: 1, kf: 40, ka: 30, pts: 6, q: true,
               players: [
-                { name: "ShadowMaster", role: "Captain" },
-                { name: "DarkStalker", role: "Rusher" },
-                { name: "NightRogue", role: "Support" },
-                { name: "EclipseShot", role: "Sniper" }
+                { name: "ShadowMaster", role: "Captain", kills: 14, deaths: 9,  damage: 3200, mp: 3 },
+                { name: "DarkStalker",  role: "Rusher",  kills: 12, deaths: 10, damage: 2800, mp: 3 },
+                { name: "NightRogue",   role: "Support", kills:  8, deaths: 8,  damage: 2100, mp: 3 },
+                { name: "EclipseShot",  role: "Sniper",  kills: 13, deaths: 7,  damage: 3600, mp: 3 },
+                { name: "VoidMark",     role: "Substitute", kills: 3, deaths: 2, damage: 700, mp: 1, substitute: true }
               ]
             },
             {
               name: "Blaze Warriors",
               mp: 3, w: 1, d: 1, l: 1, kf: 32, ka: 34, pts: 4, q: false,
               players: [
-                { name: "BlazeCommander", role: "Captain" },
-                { name: "InfernoRush", role: "Rusher" },
-                { name: "FlameShield", role: "Support" },
-                { name: "BurnSniper", role: "Sniper" }
+                { name: "BlazeCommander", role: "Captain", kills: 11, deaths: 10, damage: 2600, mp: 3 },
+                { name: "InfernoRush",    role: "Rusher",  kills:  9, deaths: 11, damage: 2200, mp: 3 },
+                { name: "FlameShield",   role: "Support", kills:  6, deaths: 9,  damage: 1800, mp: 3 },
+                { name: "BurnSniper",    role: "Sniper",  kills: 10, deaths: 8,  damage: 2900, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Ice Breakers",
               mp: 3, w: 0, d: 0, l: 3, kf: 18, ka: 46, pts: 0, q: false,
               players: [
-                { name: "FrostKing", role: "Captain" },
-                { name: "GlacierRush", role: "Rusher" },
-                { name: "SnowGuard", role: "Support" },
-                { name: "BlizzardShot", role: "Sniper" }
+                { name: "FrostKing",    role: "Captain", kills:  5, deaths: 14, damage: 1300, mp: 3 },
+                { name: "GlacierRush", role: "Rusher",  kills:  4, deaths: 12, damage: 1100, mp: 3 },
+                { name: "SnowGuard",   role: "Support", kills:  5, deaths: 11, damage: 1400, mp: 3 },
+                { name: "BlizzardShot",role: "Sniper",  kills:  7, deaths: 10, damage: 2000, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             }
           ],
@@ -1107,40 +1132,44 @@
               name: "Elite Assassins",
               mp: 3, w: 3, d: 0, l: 0, kf: 50, ka: 15, pts: 9, q: true,
               players: [
-                { name: "SilentKiller", role: "Captain" },
-                { name: "SwiftBlade", role: "Rusher" },
-                { name: "StealthMaster", role: "Support" },
-                { name: "PrecisionShot", role: "Sniper" }
+                { name: "SilentKiller",   role: "Captain", kills: 19, deaths: 5,  damage: 4500, mp: 3 },
+                { name: "SwiftBlade",     role: "Rusher",  kills: 15, deaths: 7,  damage: 3500, mp: 3 },
+                { name: "StealthMaster", role: "Support", kills: 10, deaths: 6,  damage: 2800, mp: 3 },
+                { name: "PrecisionShot", role: "Sniper",  kills: 14, deaths: 4,  damage: 4000, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Cosmic Crusaders",
               mp: 3, w: 1, d: 1, l: 1, kf: 35, ka: 32, pts: 4, q: true,
               players: [
-                { name: "StarLord", role: "Captain" },
-                { name: "GalaxyRush", role: "Rusher" },
-                { name: "NebulaSh ield", role: "Support" },
-                { name: "CometSniper", role: "Sniper" }
+                { name: "StarLord",       role: "Captain", kills: 12, deaths: 9,  damage: 2900, mp: 3 },
+                { name: "GalaxyRush",     role: "Rusher",  kills: 10, deaths: 10, damage: 2500, mp: 3 },
+                { name: "NebulaShield",  role: "Support", kills:  8, deaths: 9,  damage: 2200, mp: 3 },
+                { name: "CometSniper",   role: "Sniper",  kills: 11, deaths: 8,  damage: 3100, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Rapid Guns",
               mp: 3, w: 1, d: 0, l: 2, kf: 28, ka: 38, pts: 3, q: false,
               players: [
-                { name: "QuickDraw", role: "Captain" },
-                { name: "FastShooter", role: "Rusher" },
-                { name: "RapidFire", role: "Support" },
-                { name: "SpeedShot", role: "Sniper" }
+                { name: "QuickDraw",    role: "Captain", kills:  9, deaths: 12, damage: 2100, mp: 3 },
+                { name: "FastShooter", role: "Rusher",  kills:  8, deaths: 11, damage: 1900, mp: 3 },
+                { name: "RapidFire",   role: "Support", kills:  6, deaths: 10, damage: 1700, mp: 3 },
+                { name: "SpeedShot",   role: "Sniper",  kills:  9, deaths: 9,  damage: 2600, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             },
             {
               name: "Silent Snipers",
               mp: 3, w: 0, d: 1, l: 2, kf: 22, ka: 42, pts: 1, q: false,
               players: [
-                { name: "QuietAim", role: "Captain" },
-                { name: "StealthShot", role: "Rusher" },
-                { name: "HiddenMark", role: "Support" },
-                { name: "GhostScope", role: "Sniper" }
+                { name: "QuietAim",    role: "Captain", kills:  6, deaths: 13, damage: 1500, mp: 3 },
+                { name: "StealthShot",role: "Rusher",  kills:  5, deaths: 11, damage: 1300, mp: 3 },
+                { name: "HiddenMark", role: "Support", kills:  5, deaths: 10, damage: 1400, mp: 3 },
+                { name: "GhostScope", role: "Sniper",  kills:  8, deaths: 9,  damage: 2200, mp: 3 },
+                { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true }
               ]
             }
           ]
@@ -1434,22 +1463,58 @@
         document.getElementById("teamDetailTitle").textContent = team.name;
 
         let playersHtml = '';
-        if (team.players && team.players.length > 0) {
-          team.players.forEach(p => {
+        const mainPlayers = (team.players || []).filter(p => !p.substitute);
+        const subPlayer  = (team.players || []).find(p => p.substitute && p.name);
+
+        if (mainPlayers.length > 0 || subPlayer) {
+          mainPlayers.forEach(p => {
+            const kills  = p.kills  || 0;
+            const deaths = p.deaths || 0;
+            const kd     = deaths ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+            const avgDmg = p.mp ? Math.round((p.damage || 0) / p.mp) : 0;
             playersHtml += `
               <div class="player-roster-item">
-                <span class="player-name">${p.name}</span>
-                <span class="player-role">${p.role}</span>
+                <div class="player-name">
+                  <span>${p.name || 'TBA'}</span>
+                  <div class="player-stats-row">
+                    <span>K/D: <span class="stat-val">${kd}</span></span>
+                    <span>Avg Dmg: <span class="stat-val">${avgDmg}</span></span>
+                  </div>
+                </div>
+                <span class="player-role">${p.role || 'Player'}</span>
               </div>
             `;
           });
+
+          if (subPlayer) {
+            const kills  = subPlayer.kills  || 0;
+            const deaths = subPlayer.deaths || 0;
+            const kd     = deaths ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+            const avgDmg = subPlayer.mp ? Math.round((subPlayer.damage || 0) / subPlayer.mp) : 0;
+            playersHtml += `
+              <div style="margin-top:10px; padding-top:10px; border-top: 1px dashed rgba(245,158,11,0.4);">
+                <div style="font-size:0.7rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">⭐ Substitute</div>
+                <div class="player-roster-item" style="border-left: 3px solid #f59e0b; opacity:0.85;">
+                  <div class="player-name">
+                    <span>${subPlayer.name}</span>
+                    <div class="player-stats-row">
+                      <span>K/D: <span class="stat-val">${kd}</span></span>
+                      <span>Avg Dmg: <span class="stat-val">${avgDmg}</span></span>
+                    </div>
+                  </div>
+                  <span class="player-role" style="background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.5);">Substitute</span>
+                </div>
+              </div>
+            `;
+          }
         } else {
           playersHtml = '<p style="color: var(--text-muted); font-size: 0.85rem;">No player data available.</p>';
         }
 
+        const hasSubSlot = subPlayer ? ' + Sub' : '';
         document.getElementById("teamDetailContent").innerHTML = `
           <div class="player-roster">
-            <div class="player-roster-title">Player Roster (4 Players)</div>
+            <div class="player-roster-title">Player Roster (${mainPlayers.length} Players${hasSubSlot})</div>
             ${playersHtml}
           </div>
           <div style="margin-top: 20px; padding: 12px; background: #0d111d; border-radius: 8px;">
@@ -1521,17 +1586,44 @@
           let playersHtml = "";
           if (!t.players) t.players = [];
 
-          for (let p = 0; p < 4; p++) {
-            const player = t.players[p] || { name: "", role: "" };
+          // 4 main players + 1 substitute (index 4)
+          for (let p = 0; p < 5; p++) {
+            const isSub = p === 4;
+            const player = t.players[p] || { name: "", role: isSub ? "Substitute" : "", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: isSub };
+            const labelText = isSub ? "Substitute Player (optional)" : `Player ${p + 1}`;
+            const borderTop = isSub ? `style="margin-top:14px; padding-top:14px; border-top: 1px dashed #f59e0b;"` : "";
+            const subLabel = isSub ? `<div style="font-size:0.75rem; color:#f59e0b; font-weight:700; margin-bottom:8px;">⭐ SUBSTITUTE SLOT</div>` : "";
+
             playersHtml += `
-              <div class="grid2">
-                <div>
-                  <label>Player ${p + 1} Name</label>
-                  <input type="text" value="${player.name}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="name" placeholder="IGN">
+              <div ${borderTop}>
+                ${subLabel}
+                <div class="grid2">
+                  <div>
+                    <label>${labelText} — Name</label>
+                    <input type="text" value="${player.name || ''}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="name" placeholder="IGN${isSub ? ' (leave blank if unused)' : ''}">
+                  </div>
+                  <div>
+                    <label>Role</label>
+                    <input type="text" value="${isSub ? 'Substitute' : (player.role || '')}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="role" placeholder="${isSub ? 'Substitute' : 'Captain/Rusher/Support/Sniper'}">
+                  </div>
                 </div>
-                <div>
-                  <label>Role</label>
-                  <input type="text" value="${player.role}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="role" placeholder="Captain/Rusher/Support/Sniper">
+                <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:4px;">
+                  <div>
+                    <label>Kills</label>
+                    <input type="number" min="0" value="${player.kills || 0}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="kills" placeholder="0">
+                  </div>
+                  <div>
+                    <label>Deaths</label>
+                    <input type="number" min="0" value="${player.deaths || 0}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="deaths" placeholder="0">
+                  </div>
+                  <div>
+                    <label>Total Damage</label>
+                    <input type="number" min="0" value="${player.damage || 0}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="damage" placeholder="0">
+                  </div>
+                  <div>
+                    <label>Matches Played</label>
+                    <input type="number" min="0" value="${player.mp || 0}" data-gid="${gid}" data-tidx="${i}" data-pidx="${p}" data-field="mp" placeholder="0">
+                  </div>
                 </div>
               </div>
             `;
@@ -1542,7 +1634,7 @@
               <div class="team-edit-title">Team ${i + 1}</div>
               <label>Team Name</label>
               <input type="text" value="${t.name}" data-gid="${gid}" data-tidx="${i}" data-field="teamname" placeholder="Team Name">
-              <div style="margin-top: 12px; font-size: 0.82rem; font-weight: 700; color: #60a5fa; margin-bottom: 8px;">PLAYER ROSTER (4 Players)</div>
+              <div style="margin-top: 12px; font-size: 0.82rem; font-weight: 700; color: #60a5fa; margin-bottom: 8px;">PLAYER ROSTER (4 Main + 1 Substitute)</div>
               ${playersHtml}
             </div>
           `;
@@ -1558,16 +1650,34 @@
           AppState.groups[gid][tidx].name = inp.value.trim() || AppState.groups[gid][tidx].name;
         });
 
-        // Save players
+        // Save players (including substitute at index 4)
         document.querySelectorAll(`[data-gid="${gid}"][data-pidx]`).forEach(inp => {
           const tidx = parseInt(inp.dataset.tidx);
           const pidx = parseInt(inp.dataset.pidx);
           const field = inp.dataset.field;
+          const isSub = pidx === 4;
 
           if (!AppState.groups[gid][tidx].players) AppState.groups[gid][tidx].players = [];
-          if (!AppState.groups[gid][tidx].players[pidx]) AppState.groups[gid][tidx].players[pidx] = { name: "", role: "" };
+          if (!AppState.groups[gid][tidx].players[pidx]) {
+            AppState.groups[gid][tidx].players[pidx] = { name: "", role: isSub ? "Substitute" : "", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: isSub };
+          }
 
-          AppState.groups[gid][tidx].players[pidx][field] = inp.value.trim();
+          // Mark as substitute if it's slot 4
+          AppState.groups[gid][tidx].players[pidx].substitute = isSub;
+
+          // Numeric fields
+          if (["kills", "deaths", "damage", "mp"].includes(field)) {
+            AppState.groups[gid][tidx].players[pidx][field] = parseInt(inp.value) || 0;
+          } else {
+            AppState.groups[gid][tidx].players[pidx][field] = inp.value.trim();
+          }
+        });
+
+        // Remove substitute slot if name is empty (optional sub not filled in)
+        AppState.groups[gid].forEach(team => {
+          if (team.players && team.players[4] && !team.players[4].name) {
+            team.players[4] = { name: "", role: "Substitute", kills: 0, deaths: 0, damage: 0, mp: 0, substitute: true };
+          }
         });
 
         Storage.save(AppState);
