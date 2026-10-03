@@ -730,19 +730,6 @@
     .player-name {
       font-weight: 600;
       color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-    }
-    .player-stats-row {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      display: flex;
-      gap: 12px;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: #93c5fd;
     }
     .player-role {
       font-size: 0.75rem;
@@ -1468,40 +1455,20 @@
 
         if (mainPlayers.length > 0 || subPlayer) {
           mainPlayers.forEach(p => {
-            const kills  = p.kills  || 0;
-            const deaths = p.deaths || 0;
-            const kd     = deaths ? (kills / deaths).toFixed(2) : kills.toFixed(2);
-            const avgDmg = p.mp ? Math.round((p.damage || 0) / p.mp) : 0;
             playersHtml += `
               <div class="player-roster-item">
-                <div class="player-name">
-                  <span>${p.name || 'TBA'}</span>
-                  <div class="player-stats-row">
-                    <span>K/D: <span class="stat-val">${kd}</span></span>
-                    <span>Avg Dmg: <span class="stat-val">${avgDmg}</span></span>
-                  </div>
-                </div>
+                <span class="player-name">${p.name || 'TBA'}</span>
                 <span class="player-role">${p.role || 'Player'}</span>
               </div>
             `;
           });
 
           if (subPlayer) {
-            const kills  = subPlayer.kills  || 0;
-            const deaths = subPlayer.deaths || 0;
-            const kd     = deaths ? (kills / deaths).toFixed(2) : kills.toFixed(2);
-            const avgDmg = subPlayer.mp ? Math.round((subPlayer.damage || 0) / subPlayer.mp) : 0;
             playersHtml += `
               <div style="margin-top:10px; padding-top:10px; border-top: 1px dashed rgba(245,158,11,0.4);">
                 <div style="font-size:0.7rem; color:#f59e0b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">⭐ Substitute</div>
                 <div class="player-roster-item" style="border-left: 3px solid #f59e0b; opacity:0.85;">
-                  <div class="player-name">
-                    <span>${subPlayer.name}</span>
-                    <div class="player-stats-row">
-                      <span>K/D: <span class="stat-val">${kd}</span></span>
-                      <span>Avg Dmg: <span class="stat-val">${avgDmg}</span></span>
-                    </div>
-                  </div>
+                  <span class="player-name">${subPlayer.name}</span>
                   <span class="player-role" style="background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.5);">Substitute</span>
                 </div>
               </div>

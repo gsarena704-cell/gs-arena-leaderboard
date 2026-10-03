@@ -453,19 +453,6 @@
     .player-name {
       font-weight: 600;
       color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-    }
-    .player-stats-row {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      display: flex;
-      gap: 12px;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: #93c5fd;
     }
     .player-role {
       font-size: 0.75rem; color: var(--text-muted);
@@ -672,7 +659,6 @@
               <th class="center">Matches</th>
               <th class="center" style="color:#ef4444">Kills</th>
               <th class="center" style="color:#f59e0b">Damage</th>
-              <th class="center">Avg Dmg</th>
             </tr>
           </thead>
           <tbody id="playerLeaderboardBody"></tbody>
@@ -1861,8 +1847,6 @@
                             idx === 2 ? '<span class="pos-badge" style="background:#b45309;color:#fff;">3</span>' :
                             `<span class="pos-badge">${idx + 1}</span>`;
 
-          const avgDmg = p.matches > 0 ? Math.round(p.damage / p.matches) : 0;
-
           html += `
             <tr>
               <td class="center">${rankBadge}</td>
@@ -1875,7 +1859,6 @@
               <td class="center">${p.matches}</td>
               <td class="center" style="font-weight:800; font-size:1.05rem; color:#ef4444;">${p.kills}</td>
               <td class="center" style="font-weight:800; font-size:1.05rem; color:#f59e0b;">${p.damage.toLocaleString()}</td>
-              <td class="center" style="color:var(--text-muted);">${avgDmg}</td>
             </tr>
           `;
         });
@@ -2075,10 +2058,6 @@
               <div class="player-roster-item" style="display:grid; grid-template-columns:1fr 60px 80px; gap:10px; align-items:center;">
                 <div>
                   <div class="player-name">${p.name}</div>
-                  <div style="display:flex; gap:10px; font-size:0.7rem; color:var(--text-muted);">
-                    <span>K/D: <span style="color:#60a5fa; font-weight:700;">${st.damage ? (st.kills/st.damage).toFixed(2) : (st.kills ? st.kills.toFixed(2) : '0.00')}</span></span>
-                    <span>Avg Dmg: <span style="color:#f59e0b; font-weight:700;">${st.damage}</span></span>
-                  </div>
                   <div class="player-role">${p.uid ? 'UID: ' + p.uid : 'UID: -'}</div>
                 </div>
                 <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#ef4444;">${st.kills}</div>
@@ -2107,10 +2086,6 @@
                 <div class="player-roster-item" style="display:grid; grid-template-columns:1fr 60px 80px; gap:10px; align-items:center; border-left: 3px solid #f59e0b; opacity:0.85; padding-left:8px;">
                   <div>
                     <div class="player-name">${subPlayer.name}</div>
-                    <div style="display:flex; gap:10px; font-size:0.7rem; color:var(--text-muted);">
-                      <span>K/D: <span style="color:#60a5fa; font-weight:700;">${st.damage ? (st.kills/st.damage).toFixed(2) : (st.kills ? st.kills.toFixed(2) : '0.00')}</span></span>
-                      <span>Avg Dmg: <span style="color:#f59e0b; font-weight:700;">${st.damage}</span></span>
-                    </div>
                     <div class="player-role">${subPlayer.uid ? 'UID: ' + subPlayer.uid : 'UID: -'}</div>
                   </div>
                   <div style="text-align:center; font-size:0.85rem; font-weight:700; color:#ef4444;">${st.kills}</div>
