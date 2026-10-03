@@ -755,10 +755,10 @@
             <div style="margin-bottom:20px; padding:14px; background:rgba(59,130,246,0.1); border:1px dashed var(--accent-blue); border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
               <div>
                 <div style="font-weight:700; color:#93c5fd; font-size:0.9rem;">⚡ Quick Testing Preset</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Instantly populate 16 Free Fire Esports teams (4 per group) with full 4-player rosters.</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Instantly populate the 16 participating teams (Zyntra, Only gods, AASHxSQUAD, DRAGON ASCENSION, etc.) (4 per group) with full 4-player rosters.</div>
               </div>
               <button class="btn btn-blue" onclick="Admin.load16DemoTeams()" style="padding:8px 16px; font-size:0.85rem;">
-                ⚡ Load 16 Test Teams
+                ⚡ Load Participating Teams
               </button>
             </div>
 
@@ -939,152 +939,345 @@
     // DEFAULT DATA & LOCAL BACKUP
     // ─────────────────────────────────────────────────────────────
     
-    const DEMO_16_TEAMS = [
+        const TOURNAMENT_PARTICIPATING_TEAMS = [
       {
-        name: "Total Gaming",
-        players: [
-          { name: "TG_FozyAjay", uid: "102938471" },
-          { name: "TG_Mafia", uid: "293847102" },
-          { name: "TG_Javaboy", uid: "384710293" },
-          { name: "TG_Prince", uid: "471029384" }
-        ]
+            "name": "Zyntra",
+            "players": [
+                  {
+                        "name": "ZYN_Leader",
+                        "uid": "102938471"
+                  },
+                  {
+                        "name": "ZYN_Striker",
+                        "uid": "293847102"
+                  },
+                  {
+                        "name": "ZYN_Sniper",
+                        "uid": "384710293"
+                  },
+                  {
+                        "name": "ZYN_Rusher",
+                        "uid": "471029384"
+                  }
+            ]
       },
       {
-        name: "GodLike Esports",
-        players: [
-          { name: "GOD_Nayeem", uid: "582910394" },
-          { name: "GOD_Ginotra", uid: "693021485" },
-          { name: "GOD_Aman", uid: "704132596" },
-          { name: "GOD_Akash", uid: "815243607" }
-        ]
+            "name": "Only gods",
+            "players": [
+                  {
+                        "name": "OG_Zeus",
+                        "uid": "582910394"
+                  },
+                  {
+                        "name": "OG_Hades",
+                        "uid": "693021485"
+                  },
+                  {
+                        "name": "OG_Ares",
+                        "uid": "704132596"
+                  },
+                  {
+                        "name": "OG_Poseidon",
+                        "uid": "815243607"
+                  }
+            ]
       },
       {
-        name: "Team Elite",
-        players: [
-          { name: "TE_Killer", uid: "926354718" },
-          { name: "TE_Pahadi", uid: "137465829" },
-          { name: "TE_Iconic", uid: "248576930" },
-          { name: "TE_RDP", uid: "359687041" }
-        ]
+            "name": "AASHxSQUAD",
+            "players": [
+                  {
+                        "name": "AASH_Captain",
+                        "uid": "926354718"
+                  },
+                  {
+                        "name": "AASH_Killer",
+                        "uid": "137465829"
+                  },
+                  {
+                        "name": "AASH_Ghost",
+                        "uid": "248576930"
+                  },
+                  {
+                        "name": "AASH_Demon",
+                        "uid": "359687041"
+                  }
+            ]
       },
       {
-        name: "TSM FTX",
-        players: [
-          { name: "TSM_OldMonk", uid: "460798152" },
-          { name: "TSM_MrJayYT", uid: "571809263" },
-          { name: "TSM_Indro", uid: "682910374" },
-          { name: "TSM_Illu", uid: "793021485" }
-        ]
+            "name": "DRAGON ASCENSION",
+            "players": [
+                  {
+                        "name": "DRA_Draco",
+                        "uid": "460798152"
+                  },
+                  {
+                        "name": "DRA_Blaze",
+                        "uid": "571809263"
+                  },
+                  {
+                        "name": "DRA_Fury",
+                        "uid": "682910374"
+                  },
+                  {
+                        "name": "DRA_Shadow",
+                        "uid": "793021485"
+                  }
+            ]
       },
       {
-        name: "Orangutan Elite",
-        players: [
-          { name: "OG_Dev", uid: "804132596" },
-          { name: "OG_Taneja", uid: "915243607" },
-          { name: "OG_Frost", uid: "126354718" },
-          { name: "OG_Viper", uid: "237465829" }
-        ]
+            "name": "TEAM BROCODE",
+            "players": [
+                  {
+                        "name": "BRO_Alpha",
+                        "uid": "804132596"
+                  },
+                  {
+                        "name": "BRO_Bravo",
+                        "uid": "915243607"
+                  },
+                  {
+                        "name": "BRO_Charlie",
+                        "uid": "126354718"
+                  },
+                  {
+                        "name": "BRO_Delta",
+                        "uid": "237465829"
+                  }
+            ]
       },
       {
-        name: "Chemin Esports",
-        players: [
-          { name: "CHM_Radhetkr", uid: "348576930" },
-          { name: "CHM_Anand", uid: "459687041" },
-          { name: "CHM_Swastik", uid: "560798152" },
-          { name: "CHM_Bheem", uid: "671809263" }
-        ]
+            "name": "SHADOW SYNDICATE",
+            "players": [
+                  {
+                        "name": "SS_Shadow",
+                        "uid": "348576930"
+                  },
+                  {
+                        "name": "SS_Specter",
+                        "uid": "459687041"
+                  },
+                  {
+                        "name": "SS_Phantom",
+                        "uid": "560798152"
+                  },
+                  {
+                        "name": "SS_Wraith",
+                        "uid": "671809263"
+                  }
+            ]
       },
       {
-        name: "Nigma Galaxy",
-        players: [
-          { name: "NG_Tahil", uid: "782910374" },
-          { name: "NG_Soham", uid: "893021485" },
-          { name: "NG_Vasiyo", uid: "904132596" },
-          { name: "NG_Archie", uid: "115243607" }
-        ]
+            "name": "TEAM 69",
+            "players": [
+                  {
+                        "name": "T69_Ace",
+                        "uid": "782910374"
+                  },
+                  {
+                        "name": "T69_King",
+                        "uid": "893021485"
+                  },
+                  {
+                        "name": "T69_Jack",
+                        "uid": "904132596"
+                  },
+                  {
+                        "name": "T69_Joker",
+                        "uid": "115243607"
+                  }
+            ]
       },
       {
-        name: "Enigma Gaming",
-        players: [
-          { name: "EG_Rawknee", uid: "226354718" },
-          { name: "EG_Godku", uid: "337465829" },
-          { name: "EG_Sensei", uid: "448576930" },
-          { name: "EG_Delta", uid: "559687041" }
-        ]
+            "name": "TEAM MASTERS",
+            "players": [
+                  {
+                        "name": "MST_Master",
+                        "uid": "226354718"
+                  },
+                  {
+                        "name": "MST_Pro",
+                        "uid": "337465829"
+                  },
+                  {
+                        "name": "MST_Legend",
+                        "uid": "448576930"
+                  },
+                  {
+                        "name": "MST_Elite",
+                        "uid": "559687041"
+                  }
+            ]
       },
       {
-        name: "Hyderabad Hydras",
-        players: [
-          { name: "HH_Viper", uid: "660798152" },
-          { name: "HH_Dynamo", uid: "771809263" },
-          { name: "HH_Shadow", uid: "882910374" },
-          { name: "HH_Carry", uid: "993021485" }
-        ]
+            "name": "Heavenly Demons",
+            "players": [
+                  {
+                        "name": "HD_Lucifer",
+                        "uid": "660798152"
+                  },
+                  {
+                        "name": "HD_Asura",
+                        "uid": "771809263"
+                  },
+                  {
+                        "name": "HD_Vamp",
+                        "uid": "882910374"
+                  },
+                  {
+                        "name": "HD_Beast",
+                        "uid": "993021485"
+                  }
+            ]
       },
       {
-        name: "Revenant Esports",
-        players: [
-          { name: "RVT_Aaru", uid: "104132596" },
-          { name: "RVT_Paradox", uid: "215243607" },
-          { name: "RVT_Falcon", uid: "326354718" },
-          { name: "RVT_Shadow", uid: "437465829" }
-        ]
+            "name": "CSE",
+            "players": [
+                  {
+                        "name": "CSE_Coder",
+                        "uid": "104132596"
+                  },
+                  {
+                        "name": "CSE_Byte",
+                        "uid": "215243607"
+                  },
+                  {
+                        "name": "CSE_Cyber",
+                        "uid": "326354718"
+                  },
+                  {
+                        "name": "CSE_Matrix",
+                        "uid": "437465829"
+                  }
+            ]
       },
       {
-        name: "Blind Esports",
-        players: [
-          { name: "BLIND_Spooky", uid: "548576930" },
-          { name: "BLIND_Joker", uid: "659687041" },
-          { name: "BLIND_Blaze", uid: "760798152" },
-          { name: "BLIND_Hunter", uid: "871809263" }
-        ]
+            "name": "Marco",
+            "players": [
+                  {
+                        "name": "MCO_Marco",
+                        "uid": "548576930"
+                  },
+                  {
+                        "name": "MCO_Polo",
+                        "uid": "659687041"
+                  },
+                  {
+                        "name": "MCO_Hunter",
+                        "uid": "760798152"
+                  },
+                  {
+                        "name": "MCO_Titan",
+                        "uid": "871809263"
+                  }
+            ]
       },
       {
-        name: "7Sea Esports",
-        players: [
-          { name: "7S_Bhavin", uid: "982910374" },
-          { name: "7S_Aryan", uid: "193021485" },
-          { name: "7S_Rohit", uid: "204132596" },
-          { name: "7S_Yash", uid: "315243607" }
-        ]
+            "name": "ARTIST23",
+            "players": [
+                  {
+                        "name": "ART_Picasso",
+                        "uid": "982910374"
+                  },
+                  {
+                        "name": "ART_DaVinci",
+                        "uid": "193021485"
+                  },
+                  {
+                        "name": "ART_Brush",
+                        "uid": "204132596"
+                  },
+                  {
+                        "name": "ART_Canvas",
+                        "uid": "315243607"
+                  }
+            ]
       },
       {
-        name: "Desi Gamers",
-        players: [
-          { name: "DG_AmitBhai", uid: "426354718" },
-          { name: "DG_Romeo", uid: "537465829" },
-          { name: "DG_Survivor", uid: "648576930" },
-          { name: "DG_Jonty", uid: "759687041" }
-        ]
+            "name": "TEAM TOROID",
+            "players": [
+                  {
+                        "name": "TRD_Toroid",
+                        "uid": "426354718"
+                  },
+                  {
+                        "name": "TRD_Flux",
+                        "uid": "537465829"
+                  },
+                  {
+                        "name": "TRD_Vortex",
+                        "uid": "648576930"
+                  },
+                  {
+                        "name": "TRD_Pulse",
+                        "uid": "759687041"
+                  }
+            ]
       },
       {
-        name: "Total Havoc",
-        players: [
-          { name: "TH_Thunder", uid: "860798152" },
-          { name: "TH_Psycho", uid: "971809263" },
-          { name: "TH_Ghost", uid: "182910374" },
-          { name: "TH_Venom", uid: "293021485" }
-        ]
+            "name": "DESTINY ESPORTS",
+            "players": [
+                  {
+                        "name": "DST_Destiny",
+                        "uid": "860798152"
+                  },
+                  {
+                        "name": "DST_Fate",
+                        "uid": "971809263"
+                  },
+                  {
+                        "name": "DST_Karma",
+                        "uid": "182910374"
+                  },
+                  {
+                        "name": "DST_Immortal",
+                        "uid": "293021485"
+                  }
+            ]
       },
       {
-        name: "Galaxy Racer",
-        players: [
-          { name: "GXR_Zenix", uid: "304132596" },
-          { name: "GXR_Kronos", uid: "415243607" },
-          { name: "GXR_Titan", uid: "526354718" },
-          { name: "GXR_Stryker", uid: "637465829" }
-        ]
+            "name": "Dholakpur",
+            "players": [
+                  {
+                        "name": "DHK_Bheem",
+                        "uid": "304132596"
+                  },
+                  {
+                        "name": "DHK_Raju",
+                        "uid": "415243607"
+                  },
+                  {
+                        "name": "DHK_Jaggu",
+                        "uid": "526354718"
+                  },
+                  {
+                        "name": "DHK_Kalia",
+                        "uid": "637465829"
+                  }
+            ]
       },
       {
-        name: "Team Insane",
-        players: [
-          { name: "INS_MadMax", uid: "748576930" },
-          { name: "INS_Reaper", uid: "859687041" },
-          { name: "INS_Beast", uid: "960798152" },
-          { name: "INS_Apex", uid: "171809263" }
-        ]
+            "name": "GS ARENA",
+            "players": [
+                  {
+                        "name": "GS_Rogue",
+                        "uid": "748576930"
+                  },
+                  {
+                        "name": "GS_Viper",
+                        "uid": "859687041"
+                  },
+                  {
+                        "name": "GS_Apex",
+                        "uid": "960798152"
+                  },
+                  {
+                        "name": "GS_Havoc",
+                        "uid": "171809263"
+                  }
+            ]
       }
-    ];
+];
+    const DEMO_16_TEAMS = TOURNAMENT_PARTICIPATING_TEAMS;
 
     function getDefaultTournamentState() {
       const backup = localStorage.getItem("gs_arena_backup");
