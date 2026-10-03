@@ -1874,7 +1874,7 @@
         const i1 = m.team1?m.team1.charAt(0).toUpperCase():'?';
         const i2 = m.team2?m.team2.charAt(0).toUpperCase():'?';
         return `<div class="match-box" id="${id}">
-          <div class="match-meta-bar"><span>${m.date||'TBD'}</span><span class="${sc}">${m.status||'Upcoming'}</span></div>
+          <div class="match-meta-bar"><span class="${sc}">${m.status||'Upcoming'}</span></div>
           <div class="team-row ${m.winner===1?'winner':''}"><div class="team-info"><span class="team-flag-avatar">${i1}</span><span class="team-label-name">${m.team1||'TBD'}</span></div><div class="team-score-wrapper"><span class="win-arrow">◀</span><span class="match-score-num">${s1}</span></div></div>
           <div class="team-row ${m.winner===2?'winner':''}"><div class="team-info"><span class="team-flag-avatar">${i2}</span><span class="team-label-name">${m.team2||'TBD'}</span></div><div class="team-score-wrapper"><span class="win-arrow">◀</span><span class="match-score-num">${s2}</span></div></div></div>`;
       },
