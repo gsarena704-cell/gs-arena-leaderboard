@@ -3230,6 +3230,9 @@
         const currentScore1 = match.score1 != null ? match.score1 : '';
         const currentScore2 = match.score2 != null ? match.score2 : '';
         const matchLabel = stage === 'final' ? '🏆 GRAND FINAL' : stage === 'thirdPlace' ? '🥉 3RD PLACE' : stage === 'semifinals' ? 'SEMI-FINAL' : 'QUARTER-FINAL';
+        const isFinal = stage === 'final';
+        const winRounds = isFinal ? 6 : 4;
+        const totalRounds = isFinal ? 11 : 7;
 
         const t1 = this.getTeamByName(match.team1) || { name: match.team1, players: [] };
         const t2 = this.getTeamByName(match.team2) || { name: match.team2, players: [] };
@@ -3297,19 +3300,19 @@
 
             <!-- 2. Rounds Won -->
             <div style="margin-bottom:20px; background:rgba(0,0,0,0.25); padding:14px; border-radius:8px; border:1px solid var(--border-color);">
-              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">2. Rounds Won (First to 4 wins)</label>
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">2. Rounds Won (First to ${winRounds} wins)</label>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                 <div>
                   <label style="font-size:0.8rem;">${match.team1} Rounds Won</label>
-                  <input type="number" id="koScore1" min="0" max="4" value="${currentScore1}" placeholder="e.g. 4" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
+                  <input type="number" id="koScore1" min="0" max="${winRounds}" value="${currentScore1}" placeholder="e.g. ${winRounds}" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
                 </div>
                 <div>
                   <label style="font-size:0.8rem;">${match.team2} Rounds Won</label>
-                  <input type="number" id="koScore2" min="0" max="4" value="${currentScore2}" placeholder="e.g. 0" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
+                  <input type="number" id="koScore2" min="0" max="${winRounds}" value="${currentScore2}" placeholder="e.g. 0" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
                 </div>
               </div>
               <p style="margin:10px 0 0 0; font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
-                <b style="color:var(--accent-gold);">Rule:</b> Best-of-7. The winning team must have exactly <b style="color:#fff;">4 rounds</b>. The loser will have 0 to 3 rounds.
+                <b style="color:var(--accent-gold);">Rule:</b> Best-of-${totalRounds}. The winning team must have exactly <b style="color:#fff;">${winRounds} rounds</b>. The loser will have 0 to ${winRounds - 1} rounds.${isFinal ? ' <b style="color:var(--accent-gold);">(Grand Final is an 11-round match)</b>' : ''}
               </p>
             </div>
 
@@ -3405,6 +3408,9 @@
           return;
         }
 
+        const isFinal = stage === 'final';
+        const winRounds = isFinal ? 6 : 4;
+
         const score1Val = document.getElementById("koScore1").value;
         const score2Val = document.getElementById("koScore2").value;
 
@@ -3416,12 +3422,12 @@
           return;
         }
 
-        if ((winnerNum === 1 && score1 !== 4) || (winnerNum === 2 && score2 !== 4)) {
-          UI.toast("The winning team must have exactly 4 rounds won!", true);
+        if ((winnerNum === 1 && score1 !== winRounds) || (winnerNum === 2 && score2 !== winRounds)) {
+          UI.toast(`The winning team must have exactly ${winRounds} rounds won!`, true);
           return;
         }
-        if ((winnerNum === 1 && score2 >= 4) || (winnerNum === 2 && score1 >= 4)) {
-          UI.toast("The losing team cannot have 4 or more rounds won!", true);
+        if ((winnerNum === 1 && score2 >= winRounds) || (winnerNum === 2 && score1 >= winRounds)) {
+          UI.toast(`The losing team cannot have ${winRounds} or more rounds won!`, true);
           return;
         }
 
