@@ -603,6 +603,7 @@
     <nav class="stage-navigation">
       <button class="stage-tab-btn active" onclick="UI.switchStage('groups', this)">Group Stage</button>
       <button class="stage-tab-btn" onclick="UI.switchStage('knockout', this)">Knockout Stage</button>
+      <button class="stage-tab-btn" onclick="UI.switchStage('finalStats', this)">Final Match Stats</button>
     </nav>
 
     <!-- GROUP STAGE -->
@@ -691,6 +692,11 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- FINAL MATCH STATS -->
+    <section id="viewFinalStats" class="tab-content-view">
+      <div id="finalStatsContainer" style="max-width:100%; margin:0 auto;"></div>
     </section>
   </main>
 
@@ -1454,6 +1460,7 @@
         this.renderMatchBreakdown();
         this.renderPlayerStats();
         this.renderKnockout();
+        this.renderFinalStats();
       },
 
       filterBreakdownGroup(group, btn) {
@@ -1929,6 +1936,162 @@
           line("cb_sf0","cb_final",AppState.knockout.semifinals[0].winner!==null);
           line("cb_sf1","cb_final",AppState.knockout.semifinals[1].winner!==null);
         }
+      },
+
+      // ── 5. Final Match Player Stats ──
+      renderFinalStats() {
+        const container = document.getElementById("finalStatsContainer");
+        if (!container) return;
+        container.innerHTML = "";
+
+        const finalMatch = AppState.knockout && AppState.knockout.final;
+
+        if (!finalMatch || !finalMatch.team1 || !finalMatch.team2) {
+          container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">🏆 Final match teams not yet determined. Complete the semi-finals to see final match stats.</div>';
+          return;
+        }
+
+        if (!finalMatch.played || !finalMatch.winner) {
+          container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">⏳ Final match has not been played yet. Enter the final match result in Admin to see player stats.</div>';
+          return;
+        }
+
+        // Match has been played, show stats
+        const t1Name = finalMatch.team1;
+        const t2Name = finalMatch.team2;
+        const s1 = finalMatch.score1 != null ? finalMatch.score1 : '-';
+        const s2 = finalMatch.score2 != null ? finalMatch.score2 : '-';
+        const winnerName = finalMatch.winner === 1 ? t1Name : t2Name;
+
+        const pStats = finalMatch.playerStats || { team1: [], team2: [] };
+        const t1Stats = pStats.team1 || [];
+        const t2Stats = pStats.team2 || [];
+
+        let t1TotalKills = t1Stats.reduce((acc, p) => acc + (parseInt(p.kills) || 0), 0);
+        let t1TotalDmg = t1Stats.reduce((acc, p) => acc + (parseInt(p.damage) || 0), 0);
+        let t2TotalKills = t2Stats.reduce((acc, p) => acc + (parseInt(p.kills) || 0), 0);
+        let t2TotalDmg = t2Stats.reduce((acc, p) => acc + (parseInt(p.damage) || 0), 0);
+
+        // Find match MVP (highest kills, tie break highest damage)
+        let maxKills = -1;
+        let maxDmg = -1;
+        let mvpName = null;
+
+        [...t1Stats, ...t2Stats].forEach(p => {
+          const k = parseInt(p.kills) || 0;
+          const d = parseInt(p.damage) || 0;
+          if (k > maxKills || (k === maxKills && d > maxDmg)) {
+            maxKills = k;
+            maxDmg = d;
+            mvpName = p.name;
+          }
+        });
+
+        // Build Team 1 player rows
+        let t1PlayerRows = '';
+        if (t1Stats.length > 0) {
+          t1Stats.forEach((p, pIdx) => {
+            const isMvp = mvpName && p.name === mvpName && maxKills > 0;
+            t1PlayerRows += `
+              <div class="player-stat-row">
+                <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ${p.name || 'Player'} ${p.uid ? `<span style="color:var(--text-muted);font-size:0.7rem;">(${p.uid})</span>` : ''}
+                  ${isMvp ? '<span class="stat-mvp-badge">👑 MVP</span>' : ''}
+                </div>
+                <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0}</div>
+                <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0}</div>
+              </div>
+            `;
+          });
+        } else {
+          t1PlayerRows = '<p style="color:var(--text-muted);font-size:0.8rem;padding:6px;">No player stats recorded.</p>';
+        }
+
+        // Build Team 2 player rows
+        let t2PlayerRows = '';
+        if (t2Stats.length > 0) {
+          t2Stats.forEach((p, pIdx) => {
+            const isMvp = mvpName && p.name === mvpName && maxKills > 0;
+            t2PlayerRows += `
+              <div class="player-stat-row">
+                <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ${p.name || 'Player'} ${p.uid ? `<span style="color:var(--text-muted);font-size:0.7rem;">(${p.uid})</span>` : ''}
+                  ${isMvp ? '<span class="stat-mvp-badge">👑 MVP</span>' : ''}
+                </div>
+                <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0}</div>
+                <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0}</div>
+              </div>
+            `;
+          });
+        } else {
+          t2PlayerRows = '<p style="color:var(--text-muted);font-size:0.8rem;padding:6px;">No player stats recorded.</p>';
+        }
+
+        const finalStatsHtml = `
+          <div class="breakdown-card" style="margin-bottom:24px;">
+            <div class="breakdown-card-header" style="background: linear-gradient(90deg, rgba(245,158,11,0.2) 0%, rgba(59,130,246,0.1) 100%); flex-wrap:wrap; gap:8px;">
+              <div class="breakdown-match-tag" style="font-size:1.05rem; color:#f59e0b;">
+                🏆 GRAND FINAL - COMPLETE
+              </div>
+              <div style="flex: 1; text-align: right;">
+                <span style="background:rgba(16,185,129,0.2); color:var(--accent-green); padding:4px 12px; border-radius:6px; font-size:0.75rem; font-weight:700;">✅ FINISHED</span>
+              </div>
+            </div>
+
+            <div class="breakdown-body">
+              <div class="breakdown-score-banner" style="background: linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(245,158,11,0.1) 100%);">
+                <div class="breakdown-team-side">
+                  <span class="team-badge-ff" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">${t1Name.charAt(0).toUpperCase()}</span>
+                  <div>
+                    <div class="breakdown-team-name ${finalMatch.winner === 1 ? 'winner-text' : ''}">
+                      ${t1Name} ${finalMatch.winner === 1 ? '🏆' : ''}
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">${t1TotalKills} Kills · ${t1TotalDmg} Dmg</div>
+                  </div>
+                </div>
+
+                <div class="breakdown-score-display" style="display:flex; flex-direction:column; align-items:center;">
+                  <div style="font-size:2rem; font-weight:900; color:#f59e0b; letter-spacing:4px;">${s1} - ${s2}</div>
+                  <span style="font-size:0.6rem; color:var(--text-muted); margin-top:4px; text-transform:uppercase; letter-spacing:1px;">Rounds Won</span>
+                </div>
+
+                <div class="breakdown-team-side right">
+                  <div>
+                    <div class="breakdown-team-name ${finalMatch.winner === 2 ? 'winner-text' : ''}">
+                      ${finalMatch.winner === 2 ? '🏆' : ''} ${t2Name}
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">${t2TotalKills} Kills · ${t2TotalDmg} Dmg</div>
+                  </div>
+                  <span class="team-badge-ff" style="background: linear-gradient(135deg, #ec4899, #f97316);">${t2Name.charAt(0).toUpperCase()}</span>
+                </div>
+              </div>
+
+              <div style="margin-top:20px; padding:16px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px;">
+                <div style="font-size:1rem; font-weight:800; color:var(--accent-green); margin-bottom:8px;">🏅 CHAMPION</div>
+                <div style="font-size:1.4rem; font-weight:900; color:#fff;">${winnerName}</div>
+              </div>
+
+              <div class="breakdown-roster-grid" style="margin-top:24px;">
+                <div class="breakdown-team-roster-box">
+                  <div class="breakdown-roster-header">
+                    <span>${t1Name} Roster</span>
+                    <span>${t1TotalKills} Kills | ${t1TotalDmg} Dmg</span>
+                  </div>
+                  ${t1PlayerRows}
+                </div>
+                <div class="breakdown-team-roster-box">
+                  <div class="breakdown-roster-header">
+                    <span>${t2Name} Roster</span>
+                    <span>${t2TotalKills} Kills | ${t2TotalDmg} Dmg</span>
+                  </div>
+                  ${t2PlayerRows}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.innerHTML = finalStatsHtml;
       }
     };
 
@@ -1958,6 +2121,9 @@
         } else if (s === "knockout") {
           document.getElementById("viewKnockoutStage").classList.add("active");
           setTimeout(() => Renderer.drawConnectors(), 50);
+        } else if (s === "finalStats") {
+          document.getElementById("viewFinalStats").classList.add("active");
+          Renderer.renderFinalStats();
         }
       },
 
@@ -3046,6 +3212,16 @@
         `;
       },
 
+      getTeamByName(name) {
+        if (!name || !AppState.groups) return null;
+        for (const gid of ["A", "B", "C", "D"]) {
+          const teams = AppState.groups[gid] || [];
+          const t = teams.find(team => team && team.name === name);
+          if (t) return t;
+        }
+        return null;
+      },
+
       recordKnockoutMatch(stage, idx) {
         const match = stage === 'thirdPlace' || stage === 'final'
           ? AppState.knockout[stage]
@@ -3055,8 +3231,49 @@
         const currentScore2 = match.score2 != null ? match.score2 : '';
         const matchLabel = stage === 'final' ? '🏆 GRAND FINAL' : stage === 'thirdPlace' ? '🥉 3RD PLACE' : stage === 'semifinals' ? 'SEMI-FINAL' : 'QUARTER-FINAL';
 
+        const t1 = this.getTeamByName(match.team1) || { name: match.team1, players: [] };
+        const t2 = this.getTeamByName(match.team2) || { name: match.team2, players: [] };
+        const pStats = match.playerStats || { team1: [], team2: [] };
+
+        const generateKnockoutPlayerInputs = (teamObj, teamKey) => {
+          let rows = '';
+          const players = teamObj.players || [];
+          const existingList = pStats[teamKey] || [];
+
+          for (let p = 0; p < 5; p++) {
+            const isSub = p === 4;
+            const player = players[p] || { name: isSub ? '' : `Player ${p+1}`, uid: '', substitute: isSub };
+            const stat = existingList.find(s => s.name === player.name) || existingList[p] || { kills: 0, damage: 0 };
+
+            const borderTop = isSub ? 'margin-top:12px; padding-top:8px; border-top: 1px dashed #f59e0b;' : '';
+            const subLabel = isSub ? '<div style="font-size:0.7rem; color:#f59e0b; font-weight:700; margin-bottom:6px;">⭐ SUBSTITUTE (Optional)</div>' : '';
+
+            rows += `
+              <div style="${borderTop}">
+                ${subLabel}
+                <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:8px; align-items:center;">
+                  <div>
+                    <input type="text" id="ko_${teamKey}_p${p}_name" value="${stat.name || player.name || ''}" placeholder="${isSub ? 'Sub IGN (optional)' : 'IGN'}" style="margin-bottom:0; font-size:0.85rem; font-weight:600;" />
+                    <input type="hidden" id="ko_${teamKey}_p${p}_uid" value="${stat.uid || player.uid || ''}" />
+                  </div>
+                  <div>
+                    <input type="number" id="ko_${teamKey}_p${p}_kills" min="0" value="${stat.kills || 0}" placeholder="Kills" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+                  </div>
+                  <div>
+                    <input type="number" id="ko_${teamKey}_p${p}_damage" min="0" value="${stat.damage || 0}" placeholder="Damage" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+          return rows;
+        };
+
+        const t1Inputs = generateKnockoutPlayerInputs(t1, 'team1');
+        const t2Inputs = generateKnockoutPlayerInputs(t2, 'team2');
+
         const modalHtml = `
-          <div style="background:#131826; border:1px solid var(--border-color); border-radius:12px; padding:24px; width:min(600px, 95vw); max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.9);">
+          <div style="background:#131826; border:1px solid var(--border-color); border-radius:12px; padding:24px; width:min(750px, 95vw); max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.9);">
             <div style="margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <h3 style="margin:0 0 4px 0; color:var(--accent-gold); font-size:1.15rem;">⚔️ ${matchLabel}</h3>
@@ -3094,6 +3311,39 @@
               <p style="margin:10px 0 0 0; font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
                 <b style="color:var(--accent-gold);">Rule:</b> Best-of-7. The winning team must have exactly <b style="color:#fff;">4 rounds</b>. The loser will have 0 to 3 rounds.
               </p>
+            </div>
+
+            <!-- 3. Player Match Performance: Kills & Damage -->
+            <div style="margin-bottom:20px;">
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">3. Player Match Performance (Kills & Damage)</label>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <!-- Team 1 Roster -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                  <div style="font-weight:800; color:var(--accent-gold); font-size:0.88rem; margin-bottom:10px;">
+                    <span>${match.team1} Roster</span>
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:6px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                    <span>Player IGN</span>
+                    <span style="text-align:center;">Kills</span>
+                    <span style="text-align:center;">Damage</span>
+                  </div>
+                  ${t1Inputs}
+                </div>
+
+                <!-- Team 2 Roster -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                  <div style="font-weight:800; color:var(--accent-gold); font-size:0.88rem; margin-bottom:10px;">
+                    <span>${match.team2} Roster</span>
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:6px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                    <span>Player IGN</span>
+                    <span style="text-align:center;">Kills</span>
+                    <span style="text-align:center;">Damage</span>
+                  </div>
+                  ${t2Inputs}
+                </div>
+              </div>
             </div>
 
             <!-- Action Buttons -->
@@ -3175,11 +3425,54 @@
           return;
         }
 
+        // Collect player stats for team 1 (4 main + 1 substitute)
+        const t1Stats = [];
+        for (let p = 0; p < 5; p++) {
+          const nameEl = document.getElementById(`ko_team1_p${p}_name`);
+          const uidEl = document.getElementById(`ko_team1_p${p}_uid`);
+          const killsEl = document.getElementById(`ko_team1_p${p}_kills`);
+          const dmgEl = document.getElementById(`ko_team1_p${p}_damage`);
+
+          if (nameEl && nameEl.value.trim()) {
+            t1Stats.push({
+              name: nameEl.value.trim(),
+              uid: uidEl ? uidEl.value.trim() : '',
+              kills: parseInt(killsEl ? killsEl.value : 0) || 0,
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0,
+              substitute: (p === 4)
+            });
+          }
+        }
+
+        // Collect player stats for team 2 (4 main + 1 substitute)
+        const t2Stats = [];
+        for (let p = 0; p < 5; p++) {
+          const nameEl = document.getElementById(`ko_team2_p${p}_name`);
+          const uidEl = document.getElementById(`ko_team2_p${p}_uid`);
+          const killsEl = document.getElementById(`ko_team2_p${p}_kills`);
+          const dmgEl = document.getElementById(`ko_team2_p${p}_damage`);
+
+          if (nameEl && nameEl.value.trim()) {
+            t2Stats.push({
+              name: nameEl.value.trim(),
+              uid: uidEl ? uidEl.value.trim() : '',
+              kills: parseInt(killsEl ? killsEl.value : 0) || 0,
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0,
+              substitute: (p === 4)
+            });
+          }
+        }
+
         match.winner = winnerNum;
         match.status = "FT";
+        match.played = true;
         match.score1 = score1;
         match.score2 = score2;
         match.date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        match.playerStats = {
+          team1: t1Stats,
+          team2: t2Stats
+        };
 
         const winnerName = winnerNum === 1 ? match.team1 : match.team2;
         const loserName = winnerNum === 1 ? match.team2 : match.team1;
@@ -3277,17 +3570,57 @@
         const score1Val = document.getElementById("koScore1").value;
         const score2Val = document.getElementById("koScore2").value;
 
+        // Collect player stats for team 1
+        const t1Stats = [];
+        for (let p = 0; p < 5; p++) {
+          const nameEl = document.getElementById(`ko_team1_p${p}_name`);
+          const uidEl = document.getElementById(`ko_team1_p${p}_uid`);
+          const killsEl = document.getElementById(`ko_team1_p${p}_kills`);
+          const dmgEl = document.getElementById(`ko_team1_p${p}_damage`);
+
+          if (nameEl && nameEl.value.trim()) {
+            t1Stats.push({
+              name: nameEl.value.trim(),
+              uid: uidEl ? uidEl.value.trim() : '',
+              kills: parseInt(killsEl ? killsEl.value : 0) || 0,
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0,
+              substitute: (p === 4)
+            });
+          }
+        }
+
+        // Collect player stats for team 2
+        const t2Stats = [];
+        for (let p = 0; p < 5; p++) {
+          const nameEl = document.getElementById(`ko_team2_p${p}_name`);
+          const uidEl = document.getElementById(`ko_team2_p${p}_uid`);
+          const killsEl = document.getElementById(`ko_team2_p${p}_kills`);
+          const dmgEl = document.getElementById(`ko_team2_p${p}_damage`);
+
+          if (nameEl && nameEl.value.trim()) {
+            t2Stats.push({
+              name: nameEl.value.trim(),
+              uid: uidEl ? uidEl.value.trim() : '',
+              kills: parseInt(killsEl ? killsEl.value : 0) || 0,
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0,
+              substitute: (p === 4)
+            });
+          }
+        }
+
         // Set status to LIVE
         match.status = "LIVE";
+        match.played = true; // Needs to be true to render MVP/Stats properly in UI
         match.score1 = score1Val !== "" ? parseInt(score1Val) : 0;
         match.score2 = score2Val !== "" ? parseInt(score2Val) : 0;
         match.winner = null; // No winner yet since it's live
+        match.playerStats = { team1: t1Stats, team2: t2Stats };
 
         DB.save(AppState);
         Renderer.renderAll();
         this.loadKnockoutMatches();
         this.closeKnockoutModal();
-        UI.toast(`🔴 Match marked as LIVE!`);
+        UI.toast(`🔴 Match marked as LIVE (Stats updated)!`);
       }
     };
 
