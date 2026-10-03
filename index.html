@@ -473,6 +473,109 @@
       font-size: 0.8rem;
       color: var(--text-muted);
     }
+
+    /* Filter Pill Buttons */
+    .filter-btn-group {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .filter-pill-btn {
+      padding: 6px 14px; background: #151a28; border: 1px solid var(--border-color);
+      color: var(--text-muted); border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .filter-pill-btn:hover { color: #fff; border-color: var(--accent-blue); }
+    .filter-pill-btn.active {
+      background: #1e293b; color: #60a5fa; border-color: #3b82f6;
+      box-shadow: 0 0 10px rgba(59,130,246,0.3);
+    }
+
+    /* Breakdown Match Card */
+    .breakdown-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      margin-bottom: 18px;
+    }
+    .breakdown-card-header {
+      background: linear-gradient(90deg, #101420 0%, #172136 100%);
+      padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .breakdown-match-tag {
+      font-size: 0.85rem; font-weight: 800; color: var(--accent-gold);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .breakdown-body { padding: 18px; }
+    .breakdown-score-banner {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.3); padding: 14px 20px; border-radius: 8px;
+      margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05);
+      flex-wrap: wrap; gap: 12px;
+    }
+    .breakdown-team-side {
+      display: flex; align-items: center; gap: 10px; flex: 1; min-width: 140px;
+    }
+    .breakdown-team-side.right {
+      justify-content: flex-end; text-align: right;
+    }
+    .breakdown-team-name {
+      font-size: 1.05rem; font-weight: 800; color: var(--text-main);
+    }
+    .breakdown-team-name.winner-text {
+      color: var(--accent-green);
+    }
+    .breakdown-score-display {
+      font-size: 1.4rem; font-weight: 900; color: var(--accent-gold);
+      padding: 0 16px; letter-spacing: 2px;
+    }
+    .breakdown-roster-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .breakdown-roster-grid { grid-template-columns: 1fr; }
+    }
+    .breakdown-team-roster-box {
+      background: #0d111d; border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 12px;
+    }
+    .breakdown-roster-header {
+      font-size: 0.8rem; font-weight: 800; color: var(--accent-blue);
+      text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between;
+    }
+    .player-stat-row {
+      display: grid; grid-template-columns: 1fr 65px 85px; gap: 8px;
+      padding: 6px 8px; font-size: 0.82rem; border-radius: 4px;
+      background: rgba(255,255,255,0.02); margin-bottom: 4px; align-items: center;
+    }
+    .player-stat-row:nth-child(even) { background: rgba(255,255,255,0.05); }
+    .stat-mvp-badge {
+      background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b;
+      padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; margin-left: 6px;
+    }
+
+    /* Highlight Cards in Player Stats */
+    .stat-highlight-card {
+      background: linear-gradient(135deg, #151a28 0%, #1e2638 100%);
+      border: 1px solid var(--border-color); border-radius: 10px; padding: 16px;
+      position: relative; overflow: hidden;
+    }
+    .stat-highlight-card::before {
+      content: ""; position: absolute; top:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-gold));
+    }
+    .stat-highlight-title {
+      font-size: 0.75rem; font-weight: 800; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .stat-highlight-val {
+      font-size: 1.6rem; font-weight: 900; color: var(--accent-gold);
+    }
+    .stat-highlight-player {
+      font-size: 1rem; font-weight: 700; color: #fff; margin-top: 2px;
+    }
+    .stat-highlight-team {
+      font-size: 0.78rem; color: var(--text-muted);
+    }
+
   </style>
 </head>
 <body>
@@ -505,6 +608,59 @@
       <div class="legend-banner">
         <div class="legend-dot-q"></div>
         <span><strong>Top 2 Teams</strong> from each group qualify for Quarter-finals. Click any team to view player roster.</span>
+      </div>
+    </section>
+
+    
+    <!-- MATCH BREAKDOWN -->
+    <section id="viewMatchBreakdown" class="tab-content-view">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+        <div class="filter-btn-group" id="matchBreakdownGroupFilter">
+          <button class="filter-pill-btn active" onclick="Renderer.filterBreakdownGroup('ALL', this)">All Groups</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterBreakdownGroup('A', this)">Group A</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterBreakdownGroup('B', this)">Group B</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterBreakdownGroup('C', this)">Group C</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterBreakdownGroup('D', this)">Group D</button>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">
+          6 Round-Robin Matches per Group (M1 – M6 · 3 matches per team)
+        </div>
+      </div>
+      <div id="matchBreakdownCardsContainer"></div>
+    </section>
+
+    <!-- PLAYER STATS (KILLS & DAMAGE) -->
+    <section id="viewPlayerStats" class="tab-content-view">
+      <div id="playerStatsHighlights" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-bottom:24px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+        <div class="filter-btn-group" id="playerStatsGroupFilter">
+          <button class="filter-pill-btn active" onclick="Renderer.filterPlayerStatsGroup('ALL', this)">All Groups</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterPlayerStatsGroup('A', this)">Group A</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterPlayerStatsGroup('B', this)">Group B</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterPlayerStatsGroup('C', this)">Group C</button>
+          <button class="filter-pill-btn" onclick="Renderer.filterPlayerStatsGroup('D', this)">Group D</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="filter-pill-btn active" id="sortKillsBtn" onclick="Renderer.setPlayerSort('kills')">🎯 Sort by Kills</button>
+          <button class="filter-pill-btn" id="sortDamageBtn" onclick="Renderer.setPlayerSort('damage')">💥 Sort by Damage</button>
+        </div>
+      </div>
+      <div class="group-card" style="padding:0; overflow:hidden;">
+        <table class="standings-table player-leaderboard-table">
+          <thead>
+            <tr>
+              <th class="center" style="width:45px">#</th>
+              <th>Player IGN & UID</th>
+              <th>Team</th>
+              <th class="center">Group</th>
+              <th class="center">Matches</th>
+              <th class="center" style="color:#ef4444">Kills 🎯</th>
+              <th class="center" style="color:#f59e0b">Damage 💥</th>
+              <th class="center">Avg Dmg</th>
+            </tr>
+          </thead>
+          <tbody id="playerLeaderboardBody"></tbody>
+        </table>
       </div>
     </section>
 
@@ -591,7 +747,7 @@
           <div class="adm-sec">
             <div class="adm-sec-title">📝 Manual Team Registration</div>
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
-              Add teams manually here. Teams will be randomly assigned to groups when you publish.
+              Add teams manually here. Teams will be added and distributed across groups when you publish.
             </p>
 
             <!-- Team Registration Form -->
@@ -654,13 +810,23 @@
             <div class="adm-sec-title" style="margin-top:24px;">📋 Teams in Registry (Not Yet Published)</div>
             <div id="teamRegistryList" style="margin-top:12px;"></div>
 
-            <!-- Publish Button -->
+                        <!-- Publish Button -->
             <div style="margin-top:24px; padding:16px; background:rgba(0,255,100,0.1); border:2px solid var(--accent-green); border-radius:8px;">
               <p style="margin:0 0 12px 0; font-size:0.9rem; color:var(--accent-green);">
-                ⚠️ Click "Publish All Teams" to randomly assign them to groups and make them visible on the dashboard.
+                ✨ Click "Publish Teams to Tournament" to add and assign new teams to groups without wiping existing teams.
               </p>
               <button class="btn btn-blue btn-full" onclick="Admin.publishAllTeams()">
-                🚀 Publish All Teams & Assign Groups
+                🚀 Publish Teams to Tournament
+              </button>
+            </div>
+
+            <!-- Reset Tournament Option -->
+            <div style="margin-top:24px; padding:16px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:8px;">
+              <p style="margin:0 0 12px 0; font-size:0.85rem; color:var(--accent-red);">
+                ⚠️ Danger Zone: Need to start over? Clear all tournament groups, tables, and matches.
+              </p>
+              <button class="btn btn-danger btn-full" onclick="Admin.resetTournament()" style="font-size:0.85rem;">
+                🗑️ Reset Entire Tournament
               </button>
             </div>
           </div>
@@ -740,20 +906,18 @@
 
   <script>
     // ╔══════════════════════════════════════════════════════════════╗
-    // ║  🔥 PASTE YOUR FIREBASE CONFIG HERE (Step 1 of setup)      ║
-    // ║  Replace the placeholder below with your Firebase config    ║
+    // ║  🔥 FIREBASE CONFIG                                          ║
     // ╚══════════════════════════════════════════════════════════════╝
     const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyBp1YzEoGoN8zZRuX5sOtfNAIb_0CI8z5A",
-    authDomain: "gs-arena-ff.firebaseapp.com",
-    databaseURL: "https://gs-arena-ff-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "gs-arena-ff",
-    storageBucket: "gs-arena-ff.firebasestorage.app",
-    messagingSenderId: "462282895857",
-    appId: "1:462282895857:web:2ff107afeac7cdcb6fd450"
-};
+      apiKey: "AIzaSyBp1YzEoGoN8zZRuX5sOtfNAIb_0CI8z5A",
+      authDomain: "gs-arena-ff.firebaseapp.com",
+      databaseURL: "https://gs-arena-ff-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "gs-arena-ff",
+      storageBucket: "gs-arena-ff.firebasestorage.app",
+      messagingSenderId: "462282895857",
+      appId: "1:462282895857:web:2ff107afeac7cdcb6fd450"
+    };
 
-    // ─────────────────────────────────────────────────────────────
     const ADMIN_PASSWORD = "gsarena2026";
     const DB_PATH = "tournament";
     let firebaseDB = null;
@@ -763,7 +927,6 @@
     // DEFAULT DATA & LOCAL BACKUP
     // ─────────────────────────────────────────────────────────────
     function getDefaultTournamentState() {
-      // Check for local backup first so refresh never wipes data
       const backup = localStorage.getItem("gs_arena_backup");
       if (backup) {
         try {
@@ -774,18 +937,8 @@
 
       return {
         lastUpdated: new Date().toISOString(),
-        groups: {
-          A: [],
-          B: [],
-          C: [],
-          D: []
-        },
-        groupMatches: {
-          A: [],
-          B: [],
-          C: [],
-          D: []
-        },
+        groups: { A: [], B: [], C: [], D: [] },
+        groupMatches: { A: [], B: [], C: [], D: [] },
         knockout: {
           quarterfinals: [
             { id:"QF1", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
@@ -809,11 +962,9 @@
     // FIREBASE INIT & DB LAYER
     // ─────────────────────────────────────────────────────────────
     function initFirebase() {
-      // If config is still placeholder, fall back to localStorage
       if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY") {
-        console.log("⚠️ Firebase not configured — using localStorage mode (offline only).");
+        console.log("⚠️ Firebase offline mode");
         setConnectionUI("offline");
-        // Load from localStorage if available
         const local = localStorage.getItem("gs_arena_offline");
         if (local) { AppState = JSON.parse(local); }
         return;
@@ -823,28 +974,25 @@
         firebase.initializeApp(FIREBASE_CONFIG);
         firebaseDB = firebase.database();
         isFirebaseReady = true;
-        console.log("✅ Firebase connected!");
         setConnectionUI("connected");
 
-        // Listen for live updates from Firebase
         firebaseDB.ref(DB_PATH).on('value', snap => {
           const data = snap.val();
           if (data) {
-            // Backward compat: old data may not have groupMatches
             if (!data.groupMatches) data.groupMatches = { A: [], B: [], C: [], D: [] };
             AppState = data;
             Renderer.renderAll();
             const ts = new Date(AppState.lastUpdated);
-            document.getElementById("syncStatus").textContent =
-              `Live · ${ts.toLocaleTimeString("en-IN", {hour:"2-digit", minute:"2-digit", second:"2-digit"})} IST`;
+            const syncEl = document.getElementById("syncStatus");
+            if (syncEl) {
+              syncEl.textContent = `Live · ${ts.toLocaleTimeString("en-IN", {hour:"2-digit", minute:"2-digit", second:"2-digit"})} IST`;
+            }
           }
         });
 
-        // Connection state monitoring
         firebaseDB.ref('.info/connected').on('value', snap => {
           setConnectionUI(snap.val() ? "connected" : "disconnected");
         });
-
       } catch (err) {
         console.error("❌ Firebase error:", err);
         setConnectionUI("offline");
@@ -855,6 +1003,7 @@
       const pill = document.getElementById("livePill");
       const label = document.getElementById("liveLabel");
       const sync = document.getElementById("syncStatus");
+      if (!pill || !label || !sync) return;
 
       if (state === "connected") {
         pill.className = "live-pill";
@@ -874,7 +1023,6 @@
       save(data) {
         data.lastUpdated = new Date().toISOString();
         AppState = data;
-        // Always save to localStorage backup so data survives refresh
         try {
           localStorage.setItem("gs_arena_backup", JSON.stringify(data));
         } catch(e) {}
@@ -896,46 +1044,431 @@
     // RENDERERS
     // ─────────────────────────────────────────────────────────────
     const Renderer = {
-      renderAll() { this.renderGroups(); this.renderKnockout(); },
+      currentBreakdownFilter: 'ALL',
+      currentPlayerFilter: 'ALL',
+      currentPlayerSort: 'kills',
 
+      renderAll() {
+        this.renderGroups();
+        this.renderMatchBreakdown();
+        this.renderPlayerStats();
+        this.renderKnockout();
+      },
+
+      filterBreakdownGroup(group, btn) {
+        this.currentBreakdownFilter = group;
+        const container = document.getElementById("matchBreakdownGroupFilter");
+        if (container) {
+          container.querySelectorAll(".filter-pill-btn").forEach(b => b.classList.remove("active"));
+        }
+        if (btn) btn.classList.add("active");
+        this.renderMatchBreakdown();
+      },
+
+      filterPlayerStatsGroup(group, btn) {
+        this.currentPlayerFilter = group;
+        const container = document.getElementById("playerStatsGroupFilter");
+        if (container) {
+          container.querySelectorAll(".filter-pill-btn").forEach(b => b.classList.remove("active"));
+        }
+        if (btn) btn.classList.add("active");
+        this.renderPlayerStats();
+      },
+
+      setPlayerSort(type) {
+        this.currentPlayerSort = type;
+        const killsBtn = document.getElementById("sortKillsBtn");
+        const dmgBtn = document.getElementById("sortDamageBtn");
+        if (killsBtn && dmgBtn) {
+          killsBtn.classList.toggle("active", type === 'kills');
+          dmgBtn.classList.toggle("active", type === 'damage');
+        }
+        this.renderPlayerStats();
+      },
+
+      // ── 1. Group Stage Standings ──
       renderGroups() {
         const container = document.getElementById("groupsGridContainer");
+        if (!container) return;
         container.innerHTML = "";
+
         ["A","B","C","D"].forEach(gid => {
-          const sorted = [...AppState.groups[gid]].sort((a,b) => b.pts - a.pts || b.w - a.w || (a.l - b.l));
+          const gTeams = (AppState.groups && AppState.groups[gid]) || [];
+          const sorted = [...gTeams].sort((a,b) => b.pts - a.pts || ((b.rw||0) - (b.rl||0)) - ((a.rw||0) - (a.rl||0)) || b.w - a.w || (a.l - b.l));
           const card = document.createElement("div");
           card.className = "group-card";
 
-          // Ensure group matches are synchronized
-          const gTeams = AppState.groups[gid] || [];
           const expectedMatches = (gTeams.length * (gTeams.length - 1)) / 2;
           const matches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
           const completedMatches = matches.filter(m => m.played).length;
           const isGroupComplete = gTeams.length >= 2 && matches.length === expectedMatches && completedMatches === expectedMatches && expectedMatches > 0;
 
           let rows = "";
-          sorted.forEach((t,i) => {
-            // Only qualify top 2 if ALL matches in the group are finished
-            const isQ = isGroupComplete && i < 2 && sorted.length >= 2;
-            t.q = isQ; // Mark qualification status
-            const bc = i===0?"gold":i===1?"silver":"";
-            const init = t.name.charAt(0).toUpperCase();
-            rows += `<tr class="${isQ?'qualified-row':''}" onclick="UI.showTeamDetail('${gid}',${i})">
-              <td class="center"><span class="pos-badge ${bc}">${i+1}</span></td>
-              <td><div class="team-cell"><span class="team-badge-ff">${init}</span><span>${t.name}</span>${isQ?'<span class="q-tag">Q</span>':''}</div></td>
-              <td class="center">${t.mp}</td>
-              <td class="center">${t.w}</td>
-              <td class="center">${t.l}</td>
-              <td class="center pts-cell">${t.pts}</td>
-            </tr>`;
-          });
+          if (sorted.length === 0) {
+            rows = '<tr><td colspan="6" class="center" style="color:var(--text-muted);padding:24px 12px;font-size:0.85rem;">No teams registered yet</td></tr>';
+          } else {
+            sorted.forEach((t,i) => {
+              const isQ = isGroupComplete && i < 2 && sorted.length >= 2;
+              t.q = isQ;
+              const bc = i===0?"gold":i===1?"silver":"";
+              const init = (t.name && t.name.length) ? t.name.charAt(0).toUpperCase() : '?';
+              const rd = (t.rw || 0) - (t.rl || 0);
+              const rdStr = rd > 0 ? `+${rd}` : rd;
+              const rdHtml = `<div style="display:flex; flex-direction:column; line-height:1.2; align-items:center;"><span style="color:${rd>0?'var(--accent-green)':rd<0?'var(--accent-red)':'var(--text-muted)'};font-weight:700;">${rdStr}</span><span style="font-size:0.65rem; color:var(--text-muted);">${t.rw||0}-${t.rl||0}</span></div>`;
 
-          card.innerHTML = `<div class="group-card-header"><span class="group-card-title">Group ${gid}</span><span class="group-card-subtitle">Round Robin</span></div>
-            <table class="standings-table"><thead><tr><th class="center" style="width:38px">#</th><th>Team</th><th class="center">MP</th><th class="center">W</th><th class="center">L</th><th class="center">PTS</th></tr></thead><tbody>${rows}</tbody></table>`;
+              rows += `<tr class="${isQ?'qualified-row':''}" onclick="UI.showTeamDetail('${gid}',${i})">
+                <td class="center"><span class="pos-badge ${bc}">${i+1}</span></td>
+                <td><div class="team-cell"><span class="team-badge-ff">${init}</span><span>${t.name}</span>${isQ?'<span class="q-tag">Q</span>':''}</div></td>
+                <td class="center">${t.mp || 0}</td>
+                <td class="center" style="color:var(--accent-green)">${t.w || 0}</td>
+                <td class="center" style="color:var(--accent-red)">${t.l || 0}</td>
+                <td class="center">${rdHtml}</td>
+                <td class="center pts-cell">${t.pts || 0}</td>
+              </tr>`;
+            });
+          }
+
+          card.innerHTML = `<div class="group-card-header">
+            <div>
+              <span class="group-card-title">Group ${gid}</span>
+              <span class="group-card-subtitle" style="margin-left:8px;">Round Robin (${completedMatches}/${matches.length} Matches)</span>
+            </div>
+            <span>${isGroupComplete ? '<span style="color:var(--accent-green);font-size:0.75rem;font-weight:700;">✅ COMPLETE</span>' : '<span style="color:var(--accent-gold);font-size:0.75rem;font-weight:700;">IN PROGRESS</span>'}</span>
+          </div>
+          <table class="standings-table"><thead><tr><th class="center" style="width:38px">#</th><th>Team</th><th class="center">MP</th><th class="center">W</th><th class="center">L</th><th class="center" title="Round Difference (Won - Lost)">RD</th><th class="center">PTS</th></tr></thead><tbody>${rows}</tbody></table>`;
           container.appendChild(card);
         });
       },
 
+      // ── 2. Match Breakdown View (M1–M6 for each group) ──
+      renderMatchBreakdown() {
+        const container = document.getElementById("matchBreakdownCardsContainer");
+        if (!container) return;
+        container.innerHTML = "";
+
+        const groupsToRender = this.currentBreakdownFilter === 'ALL'
+          ? ['A', 'B', 'C', 'D']
+          : [this.currentBreakdownFilter];
+
+        let totalMatchesRendered = 0;
+
+        groupsToRender.forEach(gid => {
+          const teams = (AppState.groups && AppState.groups[gid]) || [];
+          const matches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
+
+          if (matches.length === 0) return;
+
+          const groupSection = document.createElement("div");
+          groupSection.style.marginBottom = "30px";
+          groupSection.innerHTML = `
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+              <h3 style="margin:0; font-size:1.15rem; color:var(--accent-gold); text-transform:uppercase; letter-spacing:1px;">
+                🏆 Group ${gid} Matches
+              </h3>
+              <span style="font-size:0.8rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:3px 10px; border-radius:12px;">
+                ${matches.filter(m => m.played).length} / ${matches.length} Completed
+              </span>
+            </div>
+          `;
+
+          const matchesGrid = document.createElement("div");
+          matchesGrid.style.display = "flex";
+          matchesGrid.style.flexDirection = "column";
+          matchesGrid.style.gap = "14px";
+
+          matches.forEach((m, matchIdx) => {
+            totalMatchesRendered++;
+            const t1 = teams[m.team1] || { name: `Team ${m.team1 + 1}`, players: [] };
+            const t2 = teams[m.team2] || { name: `Team ${m.team2 + 1}`, players: [] };
+            const isPlayed = m.played;
+            const matchId = m.id || `M${matchIdx + 1}`;
+
+            const s1 = m.score1 != null ? m.score1 : '-';
+            const s2 = m.score2 != null ? m.score2 : '-';
+
+            const pStats = m.playerStats || { team1: [], team2: [] };
+            const t1Stats = pStats.team1 || [];
+            const t2Stats = pStats.team2 || [];
+
+            let t1TotalKills = t1Stats.reduce((acc, p) => acc + (parseInt(p.kills) || 0), 0);
+            let t1TotalDmg = t1Stats.reduce((acc, p) => acc + (parseInt(p.damage) || 0), 0);
+            let t2TotalKills = t2Stats.reduce((acc, p) => acc + (parseInt(p.kills) || 0), 0);
+            let t2TotalDmg = t2Stats.reduce((acc, p) => acc + (parseInt(p.damage) || 0), 0);
+
+            // Find match MVP (highest kills, tie break highest damage)
+            let maxKills = -1;
+            let maxDmg = -1;
+            let mvpName = null;
+
+            [...t1Stats, ...t2Stats].forEach(p => {
+              const k = parseInt(p.kills) || 0;
+              const d = parseInt(p.damage) || 0;
+              if (k > maxKills || (k === maxKills && d > maxDmg)) {
+                maxKills = k;
+                maxDmg = d;
+                mvpName = p.name;
+              }
+            });
+
+            // Build Team 1 player rows
+            let t1PlayerRows = '';
+            if (t1Stats.length > 0) {
+              t1Stats.forEach(p => {
+                const isMvp = isPlayed && mvpName && p.name === mvpName && maxKills > 0;
+                t1PlayerRows += `
+                  <div class="player-stat-row">
+                    <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      ${p.name || 'Player'} ${p.uid ? `<span style="color:var(--text-muted);font-size:0.7rem;">(${p.uid})</span>` : ''}
+                      ${isMvp ? '<span class="stat-mvp-badge">👑 MVP</span>' : ''}
+                    </div>
+                    <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0} 🎯</div>
+                    <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0} 💥</div>
+                  </div>
+                `;
+              });
+            } else {
+              t1PlayerRows = '<p style="color:var(--text-muted);font-size:0.8rem;padding:6px;">No individual player stats recorded yet.</p>';
+            }
+
+            // Build Team 2 player rows
+            let t2PlayerRows = '';
+            if (t2Stats.length > 0) {
+              t2Stats.forEach(p => {
+                const isMvp = isPlayed && mvpName && p.name === mvpName && maxKills > 0;
+                t2PlayerRows += `
+                  <div class="player-stat-row">
+                    <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                      ${p.name || 'Player'} ${p.uid ? `<span style="color:var(--text-muted);font-size:0.7rem;">(${p.uid})</span>` : ''}
+                      ${isMvp ? '<span class="stat-mvp-badge">👑 MVP</span>' : ''}
+                    </div>
+                    <div class="center" style="font-weight:700; color:#ef4444;">${p.kills || 0} 🎯</div>
+                    <div class="center" style="font-weight:700; color:#f59e0b;">${p.damage || 0} 💥</div>
+                  </div>
+                `;
+              });
+            } else {
+              t2PlayerRows = '<p style="color:var(--text-muted);font-size:0.8rem;padding:6px;">No individual player stats recorded yet.</p>';
+            }
+
+            
+            let dominanceTag = '';
+            if (isPlayed) {
+              const maxR = Math.max(parseInt(s1)||0, parseInt(s2)||0);
+              const minR = Math.min(parseInt(s1)||0, parseInt(s2)||0);
+              if (maxR === 4) {
+                 if (minR === 0) dominanceTag = '🔥 CLEAN SWEEP (4-0)';
+                 else if (minR === 1) dominanceTag = '💥 DOMINANT WIN (4-1)';
+                 else if (minR === 2) dominanceTag = '⚡ DECISIVE WIN (4-2)';
+                 else if (minR === 3) dominanceTag = '⚔️ CLUTCH THRILLER (4-3)';
+              } else {
+                 dominanceTag = `✅ COMPLETED (${maxR}-${minR})`;
+              }
+            }
+
+            const cardHtml = `
+              <div class="breakdown-card">
+                <div class="breakdown-card-header" style="flex-wrap:wrap; gap:8px;">
+                  <div class="breakdown-match-tag">
+                    ⚔️ Group ${gid} · Match ${matchIdx + 1} (${matchId})
+                  </div>
+                  <div>
+                    ${isPlayed ? `<span style="color:var(--accent-green); font-weight:800; font-size:0.75rem; letter-spacing:0.5px; margin-right:10px;">${dominanceTag}</span> <span style="background:rgba(255,255,255,0.1); color:var(--text-muted); padding:3px 8px; border-radius:4px; font-size:0.7rem; font-weight:700;">+1 PT</span>` : '<span style="color:var(--text-muted); font-size:0.8rem;">⏳ UPCOMING</span>'}
+                  </div>
+                </div>
+
+                <div class="breakdown-body">
+                  <div class="breakdown-score-banner">
+                    <div class="breakdown-team-side">
+                      <span class="team-badge-ff">${t1.name.charAt(0).toUpperCase()}</span>
+                      <div>
+                        <div class="breakdown-team-name ${m.winner === 1 ? 'winner-text' : ''}">
+                          ${t1.name} ${m.winner === 1 ? '🏆' : ''}
+                        </div>
+                        ${isPlayed ? `<div style="font-size:0.75rem; color:var(--text-muted);">${t1TotalKills} Kills · ${t1TotalDmg} Dmg</div>` : ''}
+                      </div>
+                    </div>
+
+                    <div class="breakdown-score-display" style="display:flex; flex-direction:column; align-items:center;">
+                      ${isPlayed ? `${s1} - ${s2}` : '<span style="color:var(--text-muted); font-size:0.9rem;">VS</span>'}
+                      ${isPlayed ? `<span style="font-size:0.6rem; color:var(--text-muted); margin-top:4px; text-transform:uppercase; letter-spacing:1px; line-height:1;">Rounds Won</span>` : ''}
+                    </div>
+
+                    <div class="breakdown-team-side right">
+                      <div>
+                        <div class="breakdown-team-name ${m.winner === 2 ? 'winner-text' : ''}">
+                          ${m.winner === 2 ? '🏆' : ''} ${t2.name}
+                        </div>
+                        ${isPlayed ? `<div style="font-size:0.75rem; color:var(--text-muted);">${t2TotalKills} Kills · ${t2TotalDmg} Dmg</div>` : ''}
+                      </div>
+                      <span class="team-badge-ff">${t2.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                  </div>
+
+                  ${isPlayed ? `
+                    <div class="breakdown-roster-grid">
+                      <div class="breakdown-team-roster-box">
+                        <div class="breakdown-roster-header">
+                          <span>${t1.name} Roster</span>
+                          <span>${t1TotalKills} Kills | ${t1TotalDmg} Dmg</span>
+                        </div>
+                        ${t1PlayerRows}
+                      </div>
+                      <div class="breakdown-team-roster-box">
+                        <div class="breakdown-roster-header">
+                          <span>${t2.name} Roster</span>
+                          <span>${t2TotalKills} Kills | ${t2TotalDmg} Dmg</span>
+                        </div>
+                        ${t2PlayerRows}
+                      </div>
+                    </div>
+                  ` : '<p style="color:var(--text-muted); font-size:0.85rem; margin:0; text-align:center;">Match has not been played yet. Player stats will appear once results are entered.</p>'}
+                </div>
+              </div>
+            `;
+
+            matchesGrid.innerHTML += cardHtml;
+          });
+
+          groupSection.appendChild(matchesGrid);
+          container.appendChild(groupSection);
+        });
+
+        if (totalMatchesRendered === 0) {
+          container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">No group matches available. Please register and publish teams in Admin.</div>';
+        }
+      },
+
+      // ── 3. Player Stats & Top Fraggers Leaderboard ──
+      renderPlayerStats() {
+        const highlightsContainer = document.getElementById("playerStatsHighlights");
+        const tbody = document.getElementById("playerLeaderboardBody");
+        if (!tbody) return;
+
+        // Aggregate player stats across all played matches
+        const playerMap = new Map(); // key: "name_uid_team"
+
+        ["A", "B", "C", "D"].forEach(gid => {
+          if (this.currentPlayerFilter !== 'ALL' && this.currentPlayerFilter !== gid) return;
+
+          const teams = (AppState.groups && AppState.groups[gid]) || [];
+          const matches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
+
+          matches.forEach(m => {
+            if (!m.played || !m.playerStats) return;
+
+            const t1 = teams[m.team1] || { name: "Team 1" };
+            const t2 = teams[m.team2] || { name: "Team 2" };
+
+            const processList = (list, teamName) => {
+              (list || []).forEach(p => {
+                if (!p.name) return;
+                const key = `${p.name}_${p.uid || ''}_${teamName}`;
+                if (!playerMap.has(key)) {
+                  playerMap.set(key, {
+                    name: p.name,
+                    uid: p.uid || '',
+                    team: teamName,
+                    group: gid,
+                    matches: 0,
+                    kills: 0,
+                    damage: 0
+                  });
+                }
+                const entry = playerMap.get(key);
+                entry.matches += 1;
+                entry.kills += (parseInt(p.kills) || 0);
+                entry.damage += (parseInt(p.damage) || 0);
+              });
+            };
+
+            processList(m.playerStats.team1, t1.name);
+            processList(m.playerStats.team2, t2.name);
+          });
+        });
+
+        const playerList = Array.from(playerMap.values());
+
+        // Sort by kills or damage
+        if (this.currentPlayerSort === 'damage') {
+          playerList.sort((a,b) => b.damage - a.damage || b.kills - a.kills);
+        } else {
+          playerList.sort((a,b) => b.kills - a.kills || b.damage - a.damage);
+        }
+
+        // Render Highlight Cards (Top Fragger, Damage King, MVP)
+        if (highlightsContainer) {
+          if (playerList.length > 0) {
+            const topKiller = [...playerList].sort((a,b) => b.kills - a.kills)[0];
+            const topDmg = [...playerList].sort((a,b) => b.damage - a.damage)[0];
+            const topAvg = [...playerList].filter(p => p.matches > 0).sort((a,b) => (b.damage/b.matches) - (a.damage/a.matches))[0];
+
+            highlightsContainer.innerHTML = `
+              <div class="stat-highlight-card">
+                <div class="stat-highlight-title">👑 Tournament Top Fragger</div>
+                <div class="stat-highlight-val" style="color:#ef4444;">${topKiller.kills} <span style="font-size:0.9rem;">Kills</span></div>
+                <div class="stat-highlight-player">${topKiller.name}</div>
+                <div class="stat-highlight-team">${topKiller.team} (Group ${topKiller.group})</div>
+              </div>
+
+              <div class="stat-highlight-card">
+                <div class="stat-highlight-title">💥 Damage King</div>
+                <div class="stat-highlight-val" style="color:#f59e0b;">${topDmg.damage.toLocaleString()} <span style="font-size:0.9rem;">Dmg</span></div>
+                <div class="stat-highlight-player">${topDmg.name}</div>
+                <div class="stat-highlight-team">${topDmg.team} (Group ${topDmg.group})</div>
+              </div>
+
+              <div class="stat-highlight-card">
+                <div class="stat-highlight-title">🎯 Highest Avg Damage</div>
+                <div class="stat-highlight-val" style="color:#60a5fa;">${topAvg ? Math.round(topAvg.damage / topAvg.matches) : 0} <span style="font-size:0.9rem;">/match</span></div>
+                <div class="stat-highlight-player">${topAvg ? topAvg.name : '-'}</div>
+                <div class="stat-highlight-team">${topAvg ? `${topAvg.team} (Group ${topAvg.group})` : ''}</div>
+              </div>
+            `;
+          } else {
+            highlightsContainer.innerHTML = `
+              <div class="stat-highlight-card" style="grid-column: 1 / -1; text-align:center; padding:24px;">
+                <div style="color:var(--text-muted); font-size:0.9rem;">No player statistics recorded yet. Enter match scores with player kills and damage in Admin to see leaderboard highlights!</div>
+              </div>
+            `;
+          }
+        }
+
+        // Render Table Body
+        if (playerList.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="center" style="color:var(--text-muted);padding:30px;">No player data available for this filter.</td></tr>';
+          return;
+        }
+
+        let html = '';
+        playerList.forEach((p, idx) => {
+          const rankBadge = idx === 0 ? '<span class="pos-badge gold">1</span>' :
+                            idx === 1 ? '<span class="pos-badge silver">2</span>' :
+                            idx === 2 ? '<span class="pos-badge" style="background:#b45309;color:#fff;">3</span>' :
+                            `<span class="pos-badge">${idx + 1}</span>`;
+
+          const avgDmg = p.matches > 0 ? Math.round(p.damage / p.matches) : 0;
+
+          html += `
+            <tr>
+              <td class="center">${rankBadge}</td>
+              <td>
+                <div style="font-weight:700; color:var(--text-main);">${p.name}</div>
+                ${p.uid ? `<div style="font-size:0.75rem; color:var(--text-muted);">UID: ${p.uid}</div>` : ''}
+              </td>
+              <td style="font-weight:600; color:var(--accent-blue);">${p.team}</td>
+              <td class="center"><span style="background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:4px; font-weight:700;">Group ${p.group}</span></td>
+              <td class="center">${p.matches}</td>
+              <td class="center" style="font-weight:800; font-size:1.05rem; color:#ef4444;">${p.kills}</td>
+              <td class="center" style="font-weight:800; font-size:1.05rem; color:#f59e0b;">${p.damage.toLocaleString()}</td>
+              <td class="center" style="color:var(--text-muted);">${avgDmg}</td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      },
+
+      // ── 4. Knockout Bracket ──
       buildMatch(m, id) {
         const s1 = m.score1!=null ? m.score1 : '<span class="score-dash">-</span>';
         const s2 = m.score2!=null ? m.score2 : '<span class="score-dash">-</span>';
@@ -949,18 +1482,32 @@
       },
 
       renderKnockout() {
-        document.getElementById("qfMatchesContainer").innerHTML = AppState.knockout.quarterfinals.map((m,i) => this.buildMatch(m,`cb_qf${i}`)).join("");
-        document.getElementById("sfMatchesContainer").innerHTML = AppState.knockout.semifinals.map((m,i) => this.buildMatch(m,`cb_sf${i}`)).join("");
-        document.getElementById("finalMatchContainer").innerHTML = this.buildMatch(AppState.knockout.final, "cb_final");
-        document.getElementById("thirdPlaceMatchContainer").innerHTML = this.buildMatch(AppState.knockout.thirdPlace, "cb_third");
+        const qf = document.getElementById("qfMatchesContainer");
+        const sf = document.getElementById("sfMatchesContainer");
+        const fn = document.getElementById("finalMatchContainer");
+        const tp = document.getElementById("thirdPlaceMatchContainer");
+
+        if (qf && AppState.knockout.quarterfinals) {
+          qf.innerHTML = AppState.knockout.quarterfinals.map((m,i) => this.buildMatch(m,`cb_qf${i}`)).join("");
+        }
+        if (sf && AppState.knockout.semifinals) {
+          sf.innerHTML = AppState.knockout.semifinals.map((m,i) => this.buildMatch(m,`cb_sf${i}`)).join("");
+        }
+        if (fn && AppState.knockout.final) {
+          fn.innerHTML = this.buildMatch(AppState.knockout.final, "cb_final");
+        }
+        if (tp && AppState.knockout.thirdPlace) {
+          tp.innerHTML = this.buildMatch(AppState.knockout.thirdPlace, "cb_third");
+        }
         setTimeout(() => this.drawConnectors(), 50);
       },
 
       drawConnectors() {
         const svg = document.getElementById("bracketConnectorSvg");
-        if (!svg) return;
+        const gridEl = document.getElementById("bracketGrid");
+        if (!svg || !gridEl) return;
         svg.innerHTML = "";
-        const grid = document.getElementById("bracketGrid").getBoundingClientRect();
+        const grid = gridEl.getBoundingClientRect();
         const line = (a,b,active) => {
           const eA = document.getElementById(a), eB = document.getElementById(b);
           if (!eA||!eB) return;
@@ -976,65 +1523,179 @@
           p.setAttribute("d",d); p.setAttribute("class",active?"bracket-line active":"bracket-line");
           svg.appendChild(p);
         };
-        line("cb_qf0","cb_sf0",AppState.knockout.quarterfinals[0].winner!==null);
-        line("cb_qf1","cb_sf0",AppState.knockout.quarterfinals[1].winner!==null);
-        line("cb_qf2","cb_sf1",AppState.knockout.quarterfinals[2].winner!==null);
-        line("cb_qf3","cb_sf1",AppState.knockout.quarterfinals[3].winner!==null);
-        line("cb_sf0","cb_final",AppState.knockout.semifinals[0].winner!==null);
-        line("cb_sf1","cb_final",AppState.knockout.semifinals[1].winner!==null);
+        if (AppState.knockout && AppState.knockout.quarterfinals && AppState.knockout.semifinals) {
+          line("cb_qf0","cb_sf0",AppState.knockout.quarterfinals[0].winner!==null);
+          line("cb_qf1","cb_sf0",AppState.knockout.quarterfinals[1].winner!==null);
+          line("cb_qf2","cb_sf1",AppState.knockout.quarterfinals[2].winner!==null);
+          line("cb_qf3","cb_sf1",AppState.knockout.quarterfinals[3].winner!==null);
+          line("cb_sf0","cb_final",AppState.knockout.semifinals[0].winner!==null);
+          line("cb_sf1","cb_final",AppState.knockout.semifinals[1].winner!==null);
+        }
       }
     };
 
     window.addEventListener("resize", () => {
-      if (document.getElementById("viewKnockoutStage").classList.contains("active")) Renderer.drawConnectors();
+      const koView = document.getElementById("viewKnockoutStage");
+      if (koView && koView.classList.contains("active")) Renderer.drawConnectors();
     });
 
     // ─────────────────────────────────────────────────────────────
-    // UI
+    // UI CONTROLLER
     // ─────────────────────────────────────────────────────────────
     const UI = {
-      switchStage(s,btn) {
-        document.querySelectorAll(".stage-tab-btn").forEach(b=>b.classList.remove("active"));
-        document.querySelectorAll(".tab-content-view").forEach(v=>v.classList.remove("active"));
-        btn.classList.add("active");
-        if(s==="groups") document.getElementById("viewGroupStage").classList.add("active");
-        else { document.getElementById("viewKnockoutStage").classList.add("active"); setTimeout(()=>Renderer.drawConnectors(),50); }
+      switchStage(s, btn) {
+        document.querySelectorAll(".stage-tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content-view").forEach(v => v.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+
+        if (s === "groups") {
+          document.getElementById("viewGroupStage").classList.add("active");
+          Renderer.renderGroups();
+        } else if (s === "breakdown") {
+          document.getElementById("viewMatchBreakdown").classList.add("active");
+          Renderer.renderMatchBreakdown();
+        } else if (s === "players") {
+          document.getElementById("viewPlayerStats").classList.add("active");
+          Renderer.renderPlayerStats();
+        } else if (s === "knockout") {
+          document.getElementById("viewKnockoutStage").classList.add("active");
+          setTimeout(() => Renderer.drawConnectors(), 50);
+        }
       },
-      openAdminModal(){ document.getElementById("adminModal").classList.add("open"); },
-      closeAdminModal(){ document.getElementById("adminModal").classList.remove("open"); },
-      switchAdminTab(t,btn){
-        document.querySelectorAll(".adm-tab").forEach(b=>b.classList.remove("active"));
-        document.querySelectorAll(".adm-panel").forEach(p=>p.classList.remove("active"));
-        btn.classList.add("active");
-        document.getElementById(`admPanel-${t}`).classList.add("active");
+
+      openAdminModal() { document.getElementById("adminModal").classList.add("open"); },
+      closeAdminModal() { document.getElementById("adminModal").classList.remove("open"); },
+
+      switchAdminTab(t, btn) {
+        document.querySelectorAll(".adm-tab").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".adm-panel").forEach(p => p.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        const panel = document.getElementById(`admPanel-${t}`);
+        if (panel) panel.classList.add("active");
       },
+
       showTeamDetail(gid, idx) {
-        const sorted = [...AppState.groups[gid]].sort((a,b) => b.pts-a.pts || b.w-a.w || (a.l-b.l));
+        const gTeams = (AppState.groups && AppState.groups[gid]) || [];
+        const sorted = [...gTeams].sort((a,b) => b.pts - a.pts || ((b.rw||0) - (b.rl||0)) - ((a.rw||0) - (a.rl||0)) || b.w - a.w || (a.l - b.l));
         const t = sorted[idx];
+        if (!t) return;
+
         document.getElementById("teamDetailTitle").textContent = t.name;
+
+        // Calculate individual player total stats across all group matches
+        const matches = (AppState.groupMatches && AppState.groupMatches[gid]) || [];
+        const originalIndex = gTeams.findIndex(team => team.name === t.name);
+
+        const playerStatsAccumulator = {};
+        (t.players || []).forEach(p => {
+          playerStatsAccumulator[p.name] = { kills: 0, damage: 0, matches: 0 };
+        });
+
+        const teamMatchesSummary = [];
+
+        matches.forEach((m, mIdx) => {
+          if (m.team1 === originalIndex || m.team2 === originalIndex) {
+            const isTeam1 = m.team1 === originalIndex;
+            const opponentIdx = isTeam1 ? m.team2 : m.team1;
+            const opponentName = (gTeams[opponentIdx] && gTeams[opponentIdx].name) || "Opponent";
+            const matchId = m.id || `M${mIdx + 1}`;
+
+            if (m.played && m.playerStats) {
+              const myStats = isTeam1 ? m.playerStats.team1 : m.playerStats.team2;
+              (myStats || []).forEach(p => {
+                if (playerStatsAccumulator[p.name]) {
+                  playerStatsAccumulator[p.name].kills += (parseInt(p.kills) || 0);
+                  playerStatsAccumulator[p.name].damage += (parseInt(p.damage) || 0);
+                  playerStatsAccumulator[p.name].matches += 1;
+                }
+              });
+            }
+
+            teamMatchesSummary.push({
+              id: matchId,
+              opponent: opponentName,
+              played: m.played,
+              won: (m.winner === 1 && isTeam1) || (m.winner === 2 && !isTeam1),
+              score: m.played && m.score1 != null ? (isTeam1 ? `${m.score1}-${m.score2}` : `${m.score2}-${m.score1}`) : '-'
+            });
+          }
+        });
+
         let ph = '';
         if (t.players && t.players.length) {
-          t.players.forEach(p => { ph += `<div class="player-roster-item"><span class="player-name">${p.name}</span><span class="player-role">${p.uid ? 'UID: ' + p.uid : ''}</span></div>`; });
-        } else { ph = '<p style="color:var(--text-muted);font-size:0.85rem;">No player data.</p>'; }
+          t.players.forEach(p => {
+            const st = playerStatsAccumulator[p.name] || { kills: 0, damage: 0 };
+            ph += `
+              <div class="player-roster-item" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div class="player-name">${p.name}</div>
+                  <div class="player-role">${p.uid ? 'UID: ' + p.uid : 'UID: -'}</div>
+                </div>
+                <div style="display:flex; gap:12px; font-size:0.85rem; font-weight:700;">
+                  <span style="color:#ef4444;">${st.kills} 🎯</span>
+                  <span style="color:#f59e0b;">${st.damage} 💥</span>
+                </div>
+              </div>`;
+          });
+        } else {
+          ph = '<p style="color:var(--text-muted);font-size:0.85rem;">No player data registered.</p>';
+        }
+
+        let matchSummaryHtml = '';
+        teamMatchesSummary.forEach(ms => {
+          matchSummaryHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(0,0,0,0.2); border-radius:6px; margin-bottom:6px; font-size:0.85rem;">
+              <span><b>${ms.id}</b> vs ${ms.opponent}</span>
+              <span>${ms.played ? (ms.won ? `<b style="color:var(--accent-green)">WON (${ms.score})</b>` : `<b style="color:var(--accent-red)">LOST (${ms.score})</b>`) : '<span style="color:var(--text-muted)">⏳ Upcoming</span>'}</span>
+            </div>
+          `;
+        });
+
         document.getElementById("teamDetailContent").innerHTML = `
-          <div class="player-roster"><div class="player-roster-title">Player Roster (4v4 Squad)</div>${ph}</div>
-          <div style="margin-top:20px;padding:12px;background:#0d111d;border-radius:8px;">
-            <div style="font-size:0.82rem;font-weight:700;color:#60a5fa;text-transform:uppercase;margin-bottom:10px;">Stats</div>
-            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:0.85rem;">
-              <div><span style="color:var(--text-muted)">MP:</span> <b>${t.mp}</b></div>
-              <div><span style="color:var(--text-muted)">PTS:</span> <b style="color:#60a5fa">${t.pts}</b></div>
-              <div><span style="color:var(--text-muted)">W:</span> <b style="color:#10b981">${t.w}</b></div>
-              <div><span style="color:var(--text-muted)">L:</span> <b style="color:#ef4444">${t.l}</b></div>
-              <div><span style="color:var(--text-muted)">Qualified:</span> <b>${t.q?'✅':'❌'}</b></div>
+          <div class="player-roster">
+            <div class="player-roster-title">👥 Squad Roster & Tournament Performance</div>
+            ${ph}
+          </div>
+
+          <div style="margin-top:16px; padding:16px; background:#0d111d; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="font-size:0.82rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:12px;">📊 Group ${gid} Matches (3 Total)</div>
+            ${matchSummaryHtml}
+          </div>
+
+          <div style="margin-top:16px; padding:14px; background:#0d111d; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="font-size:0.82rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:10px;">🏆 Overall Standings</div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; font-size:0.85rem; text-align:center;">
+              <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">
+                <div style="color:var(--text-muted); font-size:0.75rem;">MATCHES</div>
+                <div style="font-size:1.1rem; font-weight:800;">${t.mp || 0}</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">
+                <div style="color:var(--text-muted); font-size:0.7rem;">RECORD (W-L)</div>
+                <div style="font-size:1.05rem; font-weight:800; color:var(--accent-green);">${t.w || 0} - ${t.l || 0}</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">
+                <div style="color:var(--text-muted); font-size:0.75rem;">ROUNDS (W-L)</div>
+                <div style="font-size:1.05rem; font-weight:800;">${t.rw||0}-${t.rl||0}</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">
+                <div style="color:var(--text-muted); font-size:0.7rem;">POINTS</div>
+                <div style="font-size:1.05rem; font-weight:800; color:var(--accent-gold);">${t.pts || 0} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:400;">pts</span></div>
+              </div>
             </div>
           </div>`;
+
         document.getElementById("teamDetailModal").classList.add("open");
       },
-      closeTeamDetail(){ document.getElementById("teamDetailModal").classList.remove("open"); },
+
+      closeTeamDetail() { document.getElementById("teamDetailModal").classList.remove("open"); },
+
       toast(msg, err=false) {
-        const el=document.getElementById("toast"); el.textContent=msg;
-        el.className=`toast-msg show ${err?'error':''}`; clearTimeout(el._t);
-        el._t=setTimeout(()=>el.classList.remove("show"),2800);
+        const el = document.getElementById("toast");
+        if (!el) return;
+        el.textContent = msg;
+        el.className = `toast-msg show ${err ? 'error' : ''}`;
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.classList.remove("show"), 2800);
       }
     };
 
@@ -1048,12 +1709,16 @@
           this.isAuth = true;
           document.getElementById("adminLoginView").style.display = "none";
           document.getElementById("adminDashboardView").style.display = "block";
-          document.getElementById("adminSyncLabel").textContent = isFirebaseReady ? "● Live — audience sees changes instantly" : "● Offline mode — local only";
-          document.getElementById("adminSyncLabel").style.color = isFirebaseReady ? "var(--accent-green)" : "var(--text-muted)";
+          const syncLabel = document.getElementById("adminSyncLabel");
+          if (syncLabel) {
+            syncLabel.textContent = isFirebaseReady ? "● Live — audience sees changes instantly" : "● Offline mode — local only";
+            syncLabel.style.color = isFirebaseReady ? "var(--accent-green)" : "var(--text-muted)";
+          }
           this.renderRegistryList();
           UI.toast("Authorized!");
         } else { UI.toast("Wrong password", true); }
       },
+
       logout() {
         this.isAuth = false;
         document.getElementById("adminLoginView").style.display = "block";
@@ -1077,10 +1742,7 @@
           const name = document.getElementById(`regP${i}Name`).value.trim();
           const uid = document.getElementById(`regP${i}UID`).value.trim();
           if (name) {
-            players.push({
-              name: name,
-              uid: uid
-            });
+            players.push({ name: name, uid: uid });
           }
         }
 
@@ -1111,8 +1773,9 @@
 
       renderRegistryList() {
         const list = document.getElementById("teamRegistryList");
+        if (!list) return;
         if (this.registry.length === 0) {
-          list.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;padding:12px;text-align:center;">No teams added yet</p>';
+          list.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;padding:12px;text-align:center;">No teams in registry yet</p>';
           return;
         }
 
@@ -1142,79 +1805,235 @@
         }
       },
 
+      // ── Standard 6 Matches Round-Robin Scheduler for 4-team Groups ──
+      syncGroupMatches(groupId) {
+        if (!AppState.groupMatches) AppState.groupMatches = { A: [], B: [], C: [], D: [] };
+        const teams = (AppState.groups && AppState.groups[groupId]) || [];
+        const currentMatches = AppState.groupMatches[groupId] || [];
+        const newMatches = [];
+
+        if (teams.length === 4) {
+          // Exact 6 pre-decided round-robin pairings where each team plays exactly 3 matches:
+          // M1: 0 vs 1 | M2: 2 vs 3 | M3: 0 vs 2 | M4: 1 vs 3 | M5: 0 vs 3 | M6: 1 vs 2
+          const standardPairs = [
+            [0, 1],
+            [2, 3],
+            [0, 2],
+            [1, 3],
+            [0, 3],
+            [1, 2]
+          ];
+
+          standardPairs.forEach((pair, mIdx) => {
+            const existing = currentMatches.find(m =>
+              (m.team1 === pair[0] && m.team2 === pair[1]) ||
+              (m.team1 === pair[1] && m.team2 === pair[0])
+            );
+
+            if (existing) {
+              // Ensure playerStats arrays exist
+              if (!existing.playerStats) existing.playerStats = { team1: [], team2: [] };
+              if (!existing.id) existing.id = `M${mIdx + 1}`;
+              newMatches.push(existing);
+            } else {
+              // Build initial player stats placeholder for both teams
+              const t1Players = (teams[pair[0]] && teams[pair[0]].players) || [];
+              const t2Players = (teams[pair[1]] && teams[pair[1]].players) || [];
+
+              newMatches.push({
+                id: `M${mIdx + 1}`,
+                team1: pair[0],
+                team2: pair[1],
+                winner: null,
+                played: false,
+                score1: null,
+                score2: null,
+                playerStats: {
+                  team1: t1Players.map(p => ({ name: p.name, uid: p.uid || '', kills: 0, damage: 0 })),
+                  team2: t2Players.map(p => ({ name: p.name, uid: p.uid || '', kills: 0, damage: 0 }))
+                }
+              });
+            }
+          });
+        } else {
+          // Generic round-robin for other team counts
+          let mCount = 1;
+          for (let i = 0; i < teams.length; i++) {
+            for (let j = i + 1; j < teams.length; j++) {
+              const existing = currentMatches.find(m =>
+                (m.team1 === i && m.team2 === j) || (m.team1 === j && m.team2 === i)
+              );
+              if (existing) {
+                if (!existing.playerStats) existing.playerStats = { team1: [], team2: [] };
+                if (!existing.id) existing.id = `M${mCount}`;
+                newMatches.push(existing);
+              } else {
+                const t1Players = (teams[i] && teams[i].players) || [];
+                const t2Players = (teams[j] && teams[j].players) || [];
+                newMatches.push({
+                  id: `M${mCount}`,
+                  team1: i,
+                  team2: j,
+                  winner: null,
+                  played: false,
+                  score1: null,
+                  score2: null,
+                  playerStats: {
+                    team1: t1Players.map(p => ({ name: p.name, uid: p.uid || '', kills: 0, damage: 0 })),
+                    team2: t2Players.map(p => ({ name: p.name, uid: p.uid || '', kills: 0, damage: 0 }))
+                  }
+                });
+              }
+              mCount++;
+            }
+          }
+        }
+
+        AppState.groupMatches[groupId] = newMatches;
+      },
+
+      // ── Recalculate Group Standings cleanly from match outcomes ──
+      recalculateGroupStandings(groupId) {
+        const teams = AppState.groups[groupId] || [];
+        const matches = AppState.groupMatches[groupId] || [];
+
+        // Reset stats
+        teams.forEach(t => {
+          t.mp = 0;
+          t.w = 0;
+          t.l = 0;
+          t.pts = 0;
+          t.rw = 0;
+          t.rl = 0;
+          t.q = false;
+        });
+
+        // Apply results from all played matches
+        matches.forEach(m => {
+          if (m.played && m.winner !== null) {
+            const t1 = teams[m.team1];
+            const t2 = teams[m.team2];
+            if (t1 && t2) {
+              t1.mp += 1;
+              t2.mp += 1;
+
+              const s1 = parseInt(m.score1) || 0;
+              const s2 = parseInt(m.score2) || 0;
+              t1.rw += s1;
+              t1.rl += s2;
+              t2.rw += s2;
+              t2.rl += s1;
+
+              if (m.winner === 1) {
+                t1.w += 1;
+                t1.pts += 1;
+                t2.l += 1;
+              } else if (m.winner === 2) {
+                t2.w += 1;
+                t2.pts += 1;
+                t1.l += 1;
+              }
+            }
+          }
+        });
+      },
+
       publishAllTeams() {
         if (this.registry.length === 0) {
           UI.toast("⚠️ Add teams to registry first", true);
           return;
         }
 
-        const currentTotal = Object.values(AppState.groups).reduce((acc, g) => acc + g.length, 0);
-        if (currentTotal > 0) {
-          if (!confirm(`WARNING: There are already ${currentTotal} teams in groups!\n\nIf you click OK, the existing groups and match stats will be WIPED and completely replaced with the new registry teams.\n\nAre you sure you want to REPLACE the tournament?`)) {
-            return;
-          }
-        } else {
-          if (!confirm(`Publish ${this.registry.length} teams to the tournament? They will be randomly assigned to groups.`)) {
-            return;
-          }
-        }
+        if (!AppState.groups) AppState.groups = { A: [], B: [], C: [], D: [] };
+        const groupOrder = ["A", "B", "C", "D"];
+        groupOrder.forEach(gid => {
+          if (!AppState.groups[gid]) AppState.groups[gid] = [];
+        });
 
-        // Randomly shuffle teams
+        const currentTotal = groupOrder.reduce((acc, gid) => acc + AppState.groups[gid].length, 0);
+        const confirmMsg = currentTotal > 0
+          ? `Publish ${this.registry.length} new team(s) to the tournament?\n\nExisting ${currentTotal} team(s) and their match records will NOT be wiped out.`
+          : `Publish ${this.registry.length} team(s) to the tournament? They will be randomly assigned to groups.`;
+
+        if (!confirm(confirmMsg)) return;
+
+        // Shuffle new teams
         const shuffled = [...this.registry].sort(() => Math.random() - 0.5);
 
-        // Assign to groups evenly
-        const groups = { A: [], B: [], C: [], D: [] };
-        const groupOrder = ["A", "B", "C", "D"];
-
-        shuffled.forEach((team, idx) => {
-          const groupIdx = idx % 4;
-          groups[groupOrder[groupIdx]].push(team);
-        });
-
-        // Initialize round-robin matches for each group
-        const groupMatches = { A: [], B: [], C: [], D: [] };
-        groupOrder.forEach(gid => {
-          const gTeams = groups[gid];
-          for (let i = 0; i < gTeams.length; i++) {
-            for (let j = i + 1; j < gTeams.length; j++) {
-              groupMatches[gid].push({
-                team1: i,
-                team2: j,
-                winner: null,
-                played: false
-              });
+        // Distribute into the group currently having the fewest teams
+        shuffled.forEach(team => {
+          let minGroup = "A";
+          let minCount = AppState.groups["A"].length;
+          for (let k = 1; k < groupOrder.length; k++) {
+            const gid = groupOrder[k];
+            if (AppState.groups[gid].length < minCount) {
+              minCount = AppState.groups[gid].length;
+              minGroup = gid;
             }
           }
+          AppState.groups[minGroup].push({
+            name: team.name,
+            players: team.players || [],
+            mp: 0, w: 0, l: 0, pts: 0, q: false
+          });
         });
 
-        // Update AppState
-        AppState.groups = groups;
-        AppState.groupMatches = groupMatches;
-        AppState.lastUpdated = new Date().toISOString();
+        // Synchronize 6 round-robin matches for each group
+        groupOrder.forEach(gid => {
+          this.syncGroupMatches(gid);
+          this.recalculateGroupStandings(gid);
+        });
 
-        // Auto-populate quarterfinals with top 2 from each group
+        AppState.lastUpdated = new Date().toISOString();
         this.updateKnockoutBracket();
 
         DB.save(AppState);
         Renderer.renderAll();
 
-        // Clear registry
+        const addedCount = shuffled.length;
         this.registry = [];
         this.saveRegistry();
         this.renderRegistryList();
 
-        UI.toast(`✅ ${shuffled.length} teams published & randomly assigned!`);
+        UI.toast(`✅ ${addedCount} team(s) published & assigned to groups!`);
+      },
+
+      resetTournament() {
+        if (!confirm("⚠️ DANGER: Are you sure you want to RESET the entire tournament?\n\nThis will permanently delete all groups, teams, match scores, and knockout progress!")) return;
+        if (!confirm("⚠️ Please confirm once more: All tournament data will be completely wiped.")) return;
+
+        AppState = {
+          lastUpdated: new Date().toISOString(),
+          groups: { A: [], B: [], C: [], D: [] },
+          groupMatches: { A: [], B: [], C: [], D: [] },
+          knockout: {
+            quarterfinals: [
+              { id:"QF1", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
+              { id:"QF2", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
+              { id:"QF3", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
+              { id:"QF4", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" }
+            ],
+            semifinals: [
+              { id:"SF1", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
+              { id:"SF2", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" }
+            ],
+            final: { id:"FINAL", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" },
+            thirdPlace: { id:"3RD", team1:null, score1:null, team2:null, score2:null, winner:null, date:"TBD", status:"Upcoming" }
+          }
+        };
+
+        DB.save(AppState);
+        Renderer.renderAll();
+        if (document.getElementById("editTeamsContainer")) document.getElementById("editTeamsContainer").innerHTML = "";
+        if (document.getElementById("groupMatchesList")) document.getElementById("groupMatchesList").innerHTML = "";
+        UI.toast("Tournament reset successfully");
       },
 
       // ── Edit Published Teams ──
       loadTeamsForEdit() {
         const groupId = document.getElementById("editTeamGroup").value;
         const container = document.getElementById("editTeamsContainer");
-
-        if (!groupId) {
-          container.innerHTML = "";
-          return;
-        }
+        if (!groupId) { container.innerHTML = ""; return; }
 
         const teams = AppState.groups[groupId] || [];
         if (teams.length === 0) {
@@ -1224,9 +2043,7 @@
 
         let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
         teams.forEach((team, idx) => {
-          // Ensure players array exists
           if (!team.players) team.players = [];
-
           let playersHtml = '';
           for (let p = 0; p < 4; p++) {
             const player = team.players[p] || { name: "", uid: "" };
@@ -1241,10 +2058,8 @@
           html += `
             <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:16px;">
               <div style="font-weight:700; color:var(--accent-gold); margin-bottom:12px; font-size:0.95rem;">Team ${idx + 1}</div>
-
               <label style="margin-bottom:6px;">Team Name</label>
               <input type="text" id="editTeamInput_${groupId}_${idx}" value="${team.name}" style="margin-bottom:12px; font-weight:600;" />
-
               <label style="margin-bottom:6px;">Player Roster (4 Players)</label>
               <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:6px; margin-bottom:12px;">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
@@ -1253,7 +2068,6 @@
                 </div>
                 ${playersHtml}
               </div>
-
               <div style="display:flex; gap:8px; justify-content:flex-end;">
                 <button class="btn btn-green" onclick="Admin.updateTeamData('${groupId}', ${idx})" style="padding:8px 16px; font-size:0.8rem;">
                   💾 Save Team & Roster
@@ -1272,66 +2086,34 @@
       updateTeamData(groupId, teamIdx) {
         const teamNameInput = document.getElementById(`editTeamInput_${groupId}_${teamIdx}`);
         const newName = teamNameInput.value.trim();
-
-        if (!newName) {
-          UI.toast("Team name cannot be empty", true);
-          return;
-        }
+        if (!newName) { UI.toast("Team name cannot be empty", true); return; }
 
         const team = AppState.groups[groupId][teamIdx];
         const oldName = team.name;
         team.name = newName;
 
-        // Update players
         if (!team.players) team.players = [];
         for (let p = 0; p < 4; p++) {
           const nameInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_name`);
           const uidInput = document.getElementById(`editP_${groupId}_${teamIdx}_${p}_uid`);
-
           if (!team.players[p]) team.players[p] = { name: "", uid: "" };
-
           team.players[p].name = nameInput.value.trim();
           team.players[p].uid = uidInput.value.trim();
         }
 
+        this.syncGroupMatches(groupId);
         DB.save(AppState);
         Renderer.renderAll();
-        UI.toast(`✅ Updated "${oldName}" ${oldName !== newName ? `→ "${newName}"` : ''} with roster`);
+        UI.toast(`✅ Updated "${oldName}" with roster`);
       },
 
       deleteTeamFromGroup(groupId, teamIdx) {
         const team = AppState.groups[groupId][teamIdx];
-        if (!confirm(`Are you sure you want to delete "${team.name}" from Group ${groupId}?\n\nThis will remove the team and regenerate the group matches.`)) {
-          return;
-        }
+        if (!confirm(`Delete "${team.name}" from Group ${groupId}?`)) return;
 
-        // Remove team from group
         AppState.groups[groupId].splice(teamIdx, 1);
-
-        // Regenerate round-robin matches for this group
-        const gTeams = AppState.groups[groupId];
-        AppState.groupMatches[groupId] = [];
-        for (let i = 0; i < gTeams.length; i++) {
-          for (let j = i + 1; j < gTeams.length; j++) {
-            AppState.groupMatches[groupId].push({
-              team1: i,
-              team2: j,
-              winner: null,
-              played: false
-            });
-          }
-        }
-
-        // Reset stats of remaining teams in this group to keep integrity
-        gTeams.forEach(t => {
-          t.mp = 0;
-          t.w = 0;
-          t.l = 0;
-          t.pts = 0;
-          t.q = false;
-        });
-
-        // Update Knockout Bracket
+        this.syncGroupMatches(groupId);
+        this.recalculateGroupStandings(groupId);
         this.updateKnockoutBracket();
 
         DB.save(AppState);
@@ -1340,57 +2122,26 @@
         UI.toast(`🗑️ Deleted "${team.name}" from Group ${groupId}`);
       },
 
-      // ── Group Stage Match Management ──
+      // ── Group Stage Match Management (M1–M6) ──
       loadGroupMatches() {
         const groupId = document.getElementById("matchGroup").value;
         const container = document.getElementById("groupMatchesList");
+        if (!groupId) { container.innerHTML = ""; return; }
 
-        if (!groupId) {
-          container.innerHTML = "";
-          return;
-        }
-
-        const teams = AppState.groups[groupId];
+        const teams = (AppState.groups && AppState.groups[groupId]) || [];
         if (!teams || teams.length < 2) {
-          container.innerHTML = '<p style="color:var(--text-muted);padding:12px;">Not enough teams in this group.</p>';
+          container.innerHTML = '<p style="color:var(--text-muted);padding:12px;">Need at least 2 teams in this group.</p>';
           return;
         }
 
-        // Ensure groupMatches exists and matches all pairings for the current teams
-        if (!AppState.groupMatches) AppState.groupMatches = { A: [], B: [], C: [], D: [] };
-
-        const expectedCount = (teams.length * (teams.length - 1)) / 2;
-        const currentMatches = AppState.groupMatches[groupId] || [];
-
-        // If match count does not match the actual round-robin combinations, regenerate while preserving valid played matches
-        if (currentMatches.length !== expectedCount) {
-          const newMatches = [];
-          for (let i = 0; i < teams.length; i++) {
-            for (let j = i + 1; j < teams.length; j++) {
-              // Find if this exact pairing already had a recorded result
-              const existing = currentMatches.find(m => m.team1 === i && m.team2 === j);
-              if (existing) {
-                newMatches.push(existing);
-              } else {
-                newMatches.push({
-                  team1: i,
-                  team2: j,
-                  winner: null,
-                  played: false
-                });
-              }
-            }
-          }
-          AppState.groupMatches[groupId] = newMatches;
-          DB.save(AppState);
-        }
+        this.syncGroupMatches(groupId);
 
         const matches = AppState.groupMatches[groupId];
         const completedCount = matches.filter(m => m.played).length;
 
         let html = `
-          <div style="margin-bottom:12px; padding:8px 12px; background:rgba(59,130,246,0.1); border-radius:6px; font-size:0.85rem; color:#93c5fd; display:flex; justify-content:space-between; align-items:center;">
-            <span>Group ${groupId} Progress: <b>${completedCount} / ${matches.length}</b> matches completed</span>
+          <div style="margin-bottom:14px; padding:10px 14px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:8px; font-size:0.85rem; color:#93c5fd; display:flex; justify-content:space-between; align-items:center;">
+            <span>Group ${groupId} Progress: <b>${completedCount} / ${matches.length}</b> matches completed (3 matches per team)</span>
             <span>${completedCount === matches.length && matches.length > 0 ? '✅ Group Complete' : '⏳ In Progress'}</span>
           </div>
           <div style="display:flex; flex-direction:column; gap:10px;">
@@ -1402,26 +2153,33 @@
           if (!t1 || !t2) return;
 
           const isPlayed = match.played;
+          const matchId = match.id || `M${matchIdx + 1}`;
           const winnerName = match.winner === 1 ? t1.name : match.winner === 2 ? t2.name : null;
 
+          const s1 = match.score1 != null ? match.score1 : '-';
+          const s2 = match.score2 != null ? match.score2 : '-';
+
           html += `
-            <div class="match-stats-item" style="border-left: 3px solid ${isPlayed ? 'var(--accent-green)' : 'var(--border-color)'};">
+            <div class="match-stats-item" style="border-left: 4px solid ${isPlayed ? 'var(--accent-green)' : 'var(--border-color)'}; padding:14px 16px;">
               <div class="match-info">
-                <div style="font-size:0.75rem; font-weight:700; color:var(--accent-gold); margin-bottom:2px;">
-                  Match ${matchIdx + 1}
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                  <span style="font-size:0.8rem; font-weight:800; color:var(--accent-gold); background:rgba(245,158,11,0.15); padding:2px 8px; border-radius:4px;">
+                    Match ${matchIdx + 1} (${matchId})
+                  </span>
+                  ${isPlayed ? `<span style="color:var(--accent-green); font-size:0.75rem; font-weight:700;">✅ Finished (${s1} - ${s2})</span>` : '<span style="color:var(--text-muted); font-size:0.75rem;">⏳ Pending</span>'}
                 </div>
-                <div class="match-teams" style="font-size:0.95rem;">
-                  <span style="color: ${match.winner === 1 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 1 ? '700' : '500'};">${t1.name}</span>
-                  <span style="color: var(--text-muted); font-size: 0.8rem; margin: 0 6px;">vs</span>
-                  <span style="color: ${match.winner === 2 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 2 ? '700' : '500'};">${t2.name}</span>
+                <div class="match-teams" style="font-size:1rem; margin-bottom:4px;">
+                  <span style="color: ${match.winner === 1 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 1 ? '800' : '600'};">${t1.name}</span>
+                  <span style="color: var(--text-muted); font-size: 0.8rem; margin: 0 8px;">vs</span>
+                  <span style="color: ${match.winner === 2 ? 'var(--accent-green)' : 'var(--text-main)'}; font-weight: ${match.winner === 2 ? '800' : '600'};">${t2.name}</span>
                 </div>
-                <div class="match-group" style="margin-top:4px;">
-                  ${isPlayed ? `<span style="color:var(--accent-green);">✅ Winner: <b>${winnerName}</b></span>` : '<span style="color:var(--text-muted);">⏳ Pending Result</span>'}
+                <div style="font-size:0.78rem; color:var(--text-muted);">
+                  ${isPlayed ? `🏆 Winner: <b style="color:var(--accent-green)">${winnerName}</b> · Player Kills & Damage recorded` : 'Click below to enter match winner, scores, and player kills/damage'}
                 </div>
               </div>
-              <div style="display:flex; gap:6px;">
-                <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.showMatchEditModal('${groupId}', ${matchIdx}, '${t1.name.replace(/'/g, "\\'")}', '${t2.name.replace(/'/g, "\\'")}')" style="padding:6px 14px; font-size:0.8rem; min-width:120px;">
-                  ${isPlayed ? '✏️ Edit' : 'Enter Result'}
+              <div style="display:flex; gap:8px;">
+                <button class="btn ${isPlayed ? 'btn-ghost' : 'btn-blue'}" onclick="Admin.showMatchEditModal('${groupId}', ${matchIdx})" style="padding:8px 16px; font-size:0.82rem; min-width:140px;">
+                  ${isPlayed ? '✏️ Edit Match & Stats' : '⚔️ Enter Result & Stats'}
                 </button>
               </div>
             </div>
@@ -1432,33 +2190,137 @@
         container.innerHTML = html;
       },
 
-      showMatchEditModal(groupId, matchIdx, team1Name, team2Name) {
+      selectedWinnerNum: null,
+
+      showMatchEditModal(groupId, matchIdx) {
         const match = AppState.groupMatches[groupId][matchIdx];
+        const teams = AppState.groups[groupId];
+        const t1 = teams[match.team1];
+        const t2 = teams[match.team2];
+        const matchId = match.id || `M${matchIdx + 1}`;
 
-        // Create modal HTML
+        this.selectedWinnerNum = match.winner || 1;
+
+        const currentScore1 = match.score1 != null ? match.score1 : (match.winner === 1 ? 4 : (match.winner === 2 ? 0 : ''));
+        const currentScore2 = match.score2 != null ? match.score2 : (match.winner === 2 ? 4 : (match.winner === 1 ? 0 : ''));
+
+        const pStats = match.playerStats || { team1: [], team2: [] };
+
+        // Helper to generate player stats inputs
+        const generatePlayerInputs = (teamObj, teamKey) => {
+          let rows = '';
+          const players = teamObj.players || [];
+          const existingList = pStats[teamKey] || [];
+
+          for (let p = 0; p < 4; p++) {
+            const player = players[p] || { name: `Player ${p+1}`, uid: '' };
+            const stat = existingList.find(s => s.name === player.name) || existingList[p] || { kills: 0, damage: 0 };
+
+            rows += `
+              <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:8px; align-items:center;">
+                <div>
+                  <input type="text" id="${teamKey}_p${p}_name" value="${player.name}" placeholder="IGN" style="margin-bottom:0; font-size:0.85rem; font-weight:600;" />
+                  <input type="hidden" id="${teamKey}_p${p}_uid" value="${player.uid || ''}" />
+                </div>
+                <div>
+                  <input type="number" id="${teamKey}_p${p}_kills" min="0" value="${stat.kills || 0}" placeholder="Kills" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+                </div>
+                <div>
+                  <input type="number" id="${teamKey}_p${p}_damage" min="0" value="${stat.damage || 0}" placeholder="Damage" style="margin-bottom:0; font-size:0.85rem; text-align:center;" />
+                </div>
+              </div>
+            `;
+          }
+          return rows;
+        };
+
+        const t1Inputs = generatePlayerInputs(t1, 'team1');
+        const t2Inputs = generatePlayerInputs(t2, 'team2');
+
         const modalHtml = `
-          <div style="background:#131826; border:1px solid var(--border-color); border-radius:12px; padding:24px; width:min(500px, 90vw);">
+          <div style="background:#131826; border:1px solid var(--border-color); border-radius:12px; padding:24px; width:min(750px, 95vw); max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.9);">
+            <div style="margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="margin:0 0 4px 0; color:var(--accent-gold); font-size:1.15rem;">⚔️ Group ${groupId} · Match ${matchIdx + 1} (${matchId})</h3>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">${t1.name} vs ${t2.name}</p>
+              </div>
+              <button class="close-modal" onclick="Admin.closeMatchModal()">&times;</button>
+            </div>
+
+            <!-- 1. Winner Selection -->
             <div style="margin-bottom:20px;">
-              <h3 style="margin:0 0 8px 0; color:var(--accent-blue);">Select Winner</h3>
-              <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">${team1Name} vs ${team2Name}</p>
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">1. Select Winning Team</label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <button type="button" id="modalWinBtn1" class="btn ${this.selectedWinnerNum === 1 ? 'btn-green' : 'btn-ghost'}" onclick="Admin.selectWinnerModal(1)" style="padding:14px; font-size:0.95rem; font-weight:800; text-align:center;">
+                  🏆 ${t1.name}
+                </button>
+                <button type="button" id="modalWinBtn2" class="btn ${this.selectedWinnerNum === 2 ? 'btn-green' : 'btn-ghost'}" onclick="Admin.selectWinnerModal(2)" style="padding:14px; font-size:0.95rem; font-weight:800; text-align:center;">
+                  🏆 ${t2.name}
+                </button>
+              </div>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-              <button class="btn btn-blue" onclick="Admin.confirmMatchResult('${groupId}', ${matchIdx}, 1)" style="padding:16px; font-size:1rem; font-weight:700;">
-                🏆 ${team1Name}
-              </button>
-              <button class="btn btn-blue" onclick="Admin.confirmMatchResult('${groupId}', ${matchIdx}, 2)" style="padding:16px; font-size:1rem; font-weight:700;">
-                🏆 ${team2Name}
-              </button>
+            <!-- 2. Rounds Won -->
+            <div style="margin-bottom:20px; background:rgba(0,0,0,0.25); padding:14px; border-radius:8px; border:1px solid var(--border-color);">
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">2. Clash Squad Rounds Won (First to 4 wins)</label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div>
+                  <label style="font-size:0.8rem;">${t1.name} Rounds Won</label>
+                  <input type="number" id="modalScore1" min="0" max="4" value="${currentScore1}" placeholder="e.g. 4" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
+                </div>
+                <div>
+                  <label style="font-size:0.8rem;">${t2.name} Rounds Won</label>
+                  <input type="number" id="modalScore2" min="0" max="4" value="${currentScore2}" placeholder="e.g. 0" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
+                </div>
+              </div>
+              <p style="margin:10px 0 0 0; font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+                <b style="color:var(--accent-gold);">Rule:</b> Match is Best-of-7. The winning team must secure exactly <b style="color:#fff;">4 rounds</b>. The loser will have between 0 to 3 rounds. The winner receives <b style="color:var(--accent-green);">+1 Tournament Point</b>.
+              </p>
             </div>
 
-            <button class="btn btn-ghost btn-full" onclick="Admin.closeMatchModal()" style="padding:10px; font-size:0.9rem;">
-              Cancel
-            </button>
+            <!-- 3. Player Performance: Kills & Damage -->
+            <div style="margin-bottom:20px;">
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">3. Player Match Performance (Kills & Damage Breakdown)</label>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <!-- Team 1 Roster -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                  <div style="font-weight:800; color:var(--accent-gold); font-size:0.88rem; margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span>${t1.name} Roster</span>
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:6px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                    <span>Player IGN</span>
+                    <span style="text-align:center;">Kills 🎯</span>
+                    <span style="text-align:center;">Damage 💥</span>
+                  </div>
+                  ${t1Inputs}
+                </div>
+
+                <!-- Team 2 Roster -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                  <div style="font-weight:800; color:var(--accent-gold); font-size:0.88rem; margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span>${t2.name} Roster</span>
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1.5fr 1fr 1.2fr; gap:8px; margin-bottom:6px; font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                    <span>Player IGN</span>
+                    <span style="text-align:center;">Kills 🎯</span>
+                    <span style="text-align:center;">Damage 💥</span>
+                  </div>
+                  ${t2Inputs}
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border-color); padding-top:16px;">
+              <button class="btn btn-ghost" onclick="Admin.closeMatchModal()" style="padding:10px 20px;">Cancel</button>
+              <button class="btn btn-blue" onclick="Admin.saveMatchWithPlayerStats('${groupId}', ${matchIdx})" style="padding:10px 24px;">
+                💾 Save Match & Player Stats
+              </button>
+            </div>
           </div>
         `;
 
-        // Show modal
         const backdrop = document.createElement('div');
         backdrop.id = 'matchEditBackdrop';
         backdrop.style.cssText = `
@@ -1470,9 +2332,14 @@
         document.body.appendChild(backdrop);
       },
 
-      confirmMatchResult(groupId, matchIdx, winnerNum) {
-        this.recordGroupMatch(groupId, matchIdx, winnerNum);
-        this.closeMatchModal();
+      selectWinnerModal(winnerNum) {
+        this.selectedWinnerNum = winnerNum;
+        const b1 = document.getElementById("modalWinBtn1");
+        const b2 = document.getElementById("modalWinBtn2");
+        if (b1 && b2) {
+          b1.className = winnerNum === 1 ? "btn btn-green" : "btn btn-ghost";
+          b2.className = winnerNum === 2 ? "btn btn-green" : "btn btn-ghost";
+        }
       },
 
       closeMatchModal() {
@@ -1480,58 +2347,95 @@
         if (backdrop) backdrop.remove();
       },
 
-      recordGroupMatch(groupId, matchIdx, winnerNum) {
-        const matches = AppState.groupMatches[groupId];
-        const match = matches[matchIdx];
-        const teams = AppState.groups[groupId];
-        const team1 = teams[match.team1];
-        const team2 = teams[match.team2];
+      saveMatchWithPlayerStats(groupId, matchIdx) {
+        const match = AppState.groupMatches[groupId][matchIdx];
+        const winnerNum = this.selectedWinnerNum;
 
-        // If this match was already played before, undo previous result first
-        if (match.played && match.winner !== null) {
-          if (match.winner === 1) {
-            team1.w--;
-            team1.pts--;
-            team2.l--;
-          } else if (match.winner === 2) {
-            team2.w--;
-            team2.pts--;
-            team1.l--;
+        if (!winnerNum || (winnerNum !== 1 && winnerNum !== 2)) {
+          UI.toast("Please select a winning team", true);
+          return;
+        }
+
+        const score1Val = document.getElementById("modalScore1").value;
+        const score2Val = document.getElementById("modalScore2").value;
+
+        const score1 = score1Val !== "" ? parseInt(score1Val) : (winnerNum === 1 ? 4 : 2);
+        const score2 = score2Val !== "" ? parseInt(score2Val) : (winnerNum === 2 ? 4 : 2);
+
+        if ((winnerNum === 1 && score1 !== 4) || (winnerNum === 2 && score2 !== 4)) {
+          UI.toast("The winning team must have exactly 4 rounds won!", true);
+          return;
+        }
+        if ((winnerNum === 1 && score2 >= 4) || (winnerNum === 2 && score1 >= 4)) {
+          UI.toast("The losing team cannot have 4 or more rounds won!", true);
+          return;
+        }
+
+        // Collect player stats for team 1
+        const t1Stats = [];
+        for (let p = 0; p < 4; p++) {
+          const nameEl = document.getElementById(`team1_p${p}_name`);
+          const uidEl = document.getElementById(`team1_p${p}_uid`);
+          const killsEl = document.getElementById(`team1_p${p}_kills`);
+          const dmgEl = document.getElementById(`team1_p${p}_damage`);
+
+          if (nameEl && nameEl.value.trim()) {
+            t1Stats.push({
+              name: nameEl.value.trim(),
+              uid: uidEl ? uidEl.value.trim() : '',
+              kills: parseInt(killsEl ? killsEl.value : 0) || 0,
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0
+            });
           }
-        } else {
-          // New match being played for first time
-          team1.mp++;
-          team2.mp++;
         }
 
-        // Apply new result
-        if (winnerNum === 1) {
-          team1.w++;
-          team1.pts++;
-          team2.l++;
-        } else {
-          team2.w++;
-          team2.pts++;
-          team1.l++;
+        // Collect player stats for team 2
+        const t2Stats = [];
+        for (let p = 0; p < 4; p++) {
+          const nameEl = document.getElementById(`team2_p${p}_name`);
+          const uidEl = document.getElementById(`team2_p${p}_uid`);
+          const killsEl = document.getElementById(`team2_p${p}_kills`);
+          const dmgEl = document.getElementById(`team2_p${p}_damage`);
+
+          if (nameEl && nameEl.value.trim()) {
+            t2Stats.push({
+              name: nameEl.value.trim(),
+              uid: uidEl ? uidEl.value.trim() : '',
+              kills: parseInt(killsEl ? killsEl.value : 0) || 0,
+              damage: parseInt(dmgEl ? dmgEl.value : 0) || 0
+            });
+          }
         }
 
-        // Mark match as played and store winner
+        // Update match object
         match.winner = winnerNum;
         match.played = true;
+        match.score1 = score1;
+        match.score2 = score2;
+        match.playerStats = {
+          team1: t1Stats,
+          team2: t2Stats
+        };
 
-        // Auto-update knockout if all groups complete
+        // Recalculate standings from all matches in this group
+        this.recalculateGroupStandings(groupId);
+
+        // Update Knockout Bracket if all groups complete
         this.updateKnockoutBracket();
 
         DB.save(AppState);
         Renderer.renderAll();
         this.loadGroupMatches();
+        this.closeMatchModal();
 
-        const winningTeam = winnerNum === 1 ? team1.name : team2.name;
-        UI.toast(`✅ Winner recorded: ${winningTeam}`);
+        const winningTeamName = winnerNum === 1
+          ? (AppState.groups[groupId][match.team1] && AppState.groups[groupId][match.team1].name)
+          : (AppState.groups[groupId][match.team2] && AppState.groups[groupId][match.team2].name);
+
+        UI.toast(`✅ Saved Match ${matchIdx + 1} (${match.id || 'M' + (matchIdx+1)})! Winner: ${winningTeamName}`);
       },
 
       updateKnockoutBracket() {
-        // Only advance teams if ALL matches across all groups are completed
         const qualified = {};
         const groupOrder = ["A", "B", "C", "D"];
 
@@ -1550,7 +2454,6 @@
           }
         });
 
-        // Populate quarterfinals:
         // QF1: A1 vs B2
         AppState.knockout.quarterfinals[0].team1 = qualified.A[0] || null;
         AppState.knockout.quarterfinals[0].team2 = qualified.B[1] || null;
@@ -1572,18 +2475,13 @@
       loadKnockoutMatches() {
         const stage = document.getElementById("knockoutStage").value;
         const container = document.getElementById("knockoutMatchesList");
-
-        if (!stage) {
-          container.innerHTML = "";
-          return;
-        }
+        if (!stage) { container.innerHTML = ""; return; }
 
         const matches = stage === 'thirdPlace' || stage === 'final'
           ? [AppState.knockout[stage]]
           : AppState.knockout[stage];
 
         let html = '<div style="margin-top:16px;">';
-
         if (Array.isArray(matches)) {
           matches.forEach((match, idx) => {
             html += this.buildKnockoutMatchItem(match, stage, idx);
@@ -1591,14 +2489,13 @@
         } else {
           html += this.buildKnockoutMatchItem(matches, stage, 0);
         }
-
         html += '</div>';
         container.innerHTML = html;
       },
 
       buildKnockoutMatchItem(match, stage, idx) {
         if (!match.team1 || !match.team2) {
-          return `<p style="color:var(--text-muted);padding:12px;">Teams not yet determined.</p>`;
+          return '<p style="color:var(--text-muted);padding:12px;">Teams not yet determined.</p>';
         }
 
         const status = match.winner ? 'Completed ✅' : 'Pending';
@@ -1621,7 +2518,6 @@
           : AppState.knockout[stage][idx];
 
         const winner = prompt(`Who won?\n1 - ${match.team1}\n2 - ${match.team2}\nEnter 1 or 2:`);
-
         if (winner !== '1' && winner !== '2') {
           UI.toast("Invalid selection", true);
           return;
@@ -1632,16 +2528,14 @@
         match.status = "FT";
         match.date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-        // Set scores (best of 3, winner gets 2)
         if (winnerNum === 1) {
           match.score1 = 2;
-          match.score2 = Math.floor(Math.random() * 2); // 0 or 1
+          match.score2 = Math.floor(Math.random() * 2);
         } else {
           match.score2 = 2;
           match.score1 = Math.floor(Math.random() * 2);
         }
 
-        // Advance winner to next round
         const winnerName = winnerNum === 1 ? match.team1 : match.team2;
         const loserName = winnerNum === 1 ? match.team2 : match.team1;
 
@@ -1664,8 +2558,7 @@
         DB.save(AppState);
         Renderer.renderAll();
         this.loadKnockoutMatches();
-
-        UI.toast(`✅ Match result recorded! Winner: ${winnerName}`);
+        UI.toast(`✅ Match recorded! Winner: ${winnerName}`);
       }
     };
 
@@ -1673,13 +2566,10 @@
     initFirebase();
     Renderer.renderAll();
 
-    // Show knockout section once groups have teams
     setInterval(() => {
       const hasTeams = Object.values(AppState.groups).some(g => g.length > 0);
       const section = document.getElementById("knockoutMatchSection");
-      if (section) {
-        section.style.display = hasTeams ? "block" : "none";
-      }
+      if (section) section.style.display = hasTeams ? "block" : "none";
     }, 1000);
   </script>
 </body>
