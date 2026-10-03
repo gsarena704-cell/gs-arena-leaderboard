@@ -3051,24 +3051,127 @@
           ? AppState.knockout[stage]
           : AppState.knockout[stage][idx];
 
-        const winner = prompt(`Who won?\n1 - ${match.team1}\n2 - ${match.team2}\nEnter 1 or 2:`);
-        if (winner !== '1' && winner !== '2') {
-          UI.toast("Invalid selection", true);
+        const currentScore1 = match.score1 != null ? match.score1 : '';
+        const currentScore2 = match.score2 != null ? match.score2 : '';
+        const matchLabel = stage === 'final' ? '🏆 GRAND FINAL' : stage === 'thirdPlace' ? '🥉 3RD PLACE' : stage === 'semifinals' ? 'SEMI-FINAL' : 'QUARTER-FINAL';
+
+        const modalHtml = `
+          <div style="background:#131826; border:1px solid var(--border-color); border-radius:12px; padding:24px; width:min(600px, 95vw); max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.9);">
+            <div style="margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="margin:0 0 4px 0; color:var(--accent-gold); font-size:1.15rem;">⚔️ ${matchLabel}</h3>
+                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">${match.team1} vs ${match.team2}</p>
+              </div>
+              <button class="close-modal" onclick="Admin.closeKnockoutModal()">&times;</button>
+            </div>
+
+            <!-- 1. Winner Selection -->
+            <div style="margin-bottom:20px;">
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">1. Select Winning Team</label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <button type="button" id="koWinBtn1" class="btn btn-ghost" onclick="Admin.selectKnockoutWinner(1)" style="padding:14px; font-size:0.95rem; font-weight:800; text-align:center;">
+                  🏆 ${match.team1}
+                </button>
+                <button type="button" id="koWinBtn2" class="btn btn-ghost" onclick="Admin.selectKnockoutWinner(2)" style="padding:14px; font-size:0.95rem; font-weight:800; text-align:center;">
+                  🏆 ${match.team2}
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Rounds Won -->
+            <div style="margin-bottom:20px; background:rgba(0,0,0,0.25); padding:14px; border-radius:8px; border:1px solid var(--border-color);">
+              <label style="font-size:0.85rem; font-weight:800; color:#60a5fa; text-transform:uppercase; margin-bottom:8px;">2. Rounds Won (First to 4 wins)</label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div>
+                  <label style="font-size:0.8rem;">${match.team1} Rounds Won</label>
+                  <input type="number" id="koScore1" min="0" max="4" value="${currentScore1}" placeholder="e.g. 4" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
+                </div>
+                <div>
+                  <label style="font-size:0.8rem;">${match.team2} Rounds Won</label>
+                  <input type="number" id="koScore2" min="0" max="4" value="${currentScore2}" placeholder="e.g. 0" style="margin-bottom:0; font-weight:700; text-align:center; font-size:1rem;" />
+                </div>
+              </div>
+              <p style="margin:10px 0 0 0; font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+                <b style="color:var(--accent-gold);">Rule:</b> Best-of-7. The winning team must have exactly <b style="color:#fff;">4 rounds</b>. The loser will have 0 to 3 rounds.
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border-color); padding-top:16px;">
+              <button class="btn btn-ghost" onclick="Admin.closeKnockoutModal()" style="padding:10px 20px;">Cancel</button>
+              <button class="btn btn-blue" onclick="Admin.saveKnockoutMatch('${stage}', ${idx})" style="padding:10px 24px;">
+                💾 Save Match Result
+              </button>
+            </div>
+          </div>
+        `;
+
+        const backdrop = document.createElement('div');
+        backdrop.id = 'knockoutModalBackdrop';
+        backdrop.style.cssText = `
+          position:fixed; inset:0; background:rgba(0,0,0,0.85);
+          display:flex; align-items:center; justify-content:center;
+          z-index:2000; padding:20px;
+        `;
+        backdrop.innerHTML = modalHtml;
+        document.body.appendChild(backdrop);
+
+        this.selectedKnockoutWinner = null;
+      },
+
+      selectedKnockoutWinner: null,
+
+      selectKnockoutWinner(winnerNum) {
+        this.selectedKnockoutWinner = winnerNum;
+        const b1 = document.getElementById("koWinBtn1");
+        const b2 = document.getElementById("koWinBtn2");
+        if (b1 && b2) {
+          b1.className = winnerNum === 1 ? "btn btn-green" : "btn btn-ghost";
+          b2.className = winnerNum === 2 ? "btn btn-green" : "btn btn-ghost";
+        }
+      },
+
+      closeKnockoutModal() {
+        const backdrop = document.getElementById('knockoutModalBackdrop');
+        if (backdrop) backdrop.remove();
+      },
+
+      saveKnockoutMatch(stage, idx) {
+        const match = stage === 'thirdPlace' || stage === 'final'
+          ? AppState.knockout[stage]
+          : AppState.knockout[stage][idx];
+
+        const winnerNum = this.selectedKnockoutWinner;
+        if (!winnerNum || (winnerNum !== 1 && winnerNum !== 2)) {
+          UI.toast("Please select a winning team", true);
           return;
         }
 
-        const winnerNum = parseInt(winner);
+        const score1Val = document.getElementById("koScore1").value;
+        const score2Val = document.getElementById("koScore2").value;
+
+        const score1 = score1Val !== "" ? parseInt(score1Val) : '';
+        const score2 = score2Val !== "" ? parseInt(score2Val) : '';
+
+        if (score1 === '' || score2 === '') {
+          UI.toast("Please enter rounds for both teams", true);
+          return;
+        }
+
+        if ((winnerNum === 1 && score1 !== 4) || (winnerNum === 2 && score2 !== 4)) {
+          UI.toast("The winning team must have exactly 4 rounds won!", true);
+          return;
+        }
+        if ((winnerNum === 1 && score2 >= 4) || (winnerNum === 2 && score1 >= 4)) {
+          UI.toast("The losing team cannot have 4 or more rounds won!", true);
+          return;
+        }
+
         match.winner = winnerNum;
         match.status = "FT";
+        match.score1 = score1;
+        match.score2 = score2;
         match.date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-
-        if (winnerNum === 1) {
-          match.score1 = 2;
-          match.score2 = Math.floor(Math.random() * 2);
-        } else {
-          match.score2 = 2;
-          match.score1 = Math.floor(Math.random() * 2);
-        }
 
         const winnerName = winnerNum === 1 ? match.team1 : match.team2;
         const loserName = winnerNum === 1 ? match.team2 : match.team1;
@@ -3092,6 +3195,7 @@
         DB.save(AppState);
         Renderer.renderAll();
         this.loadKnockoutMatches();
+        this.closeKnockoutModal();
         UI.toast(`✅ Match recorded! Winner: ${winnerName}`);
       }
     };
