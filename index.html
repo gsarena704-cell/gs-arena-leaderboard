@@ -3103,6 +3103,9 @@
               </button>
               <div style="display:flex; gap:10px;">
                 <button class="btn btn-ghost" onclick="Admin.closeKnockoutModal()" style="padding:10px 20px;">Cancel</button>
+                <button class="btn" style="background:#f59e0b; color:#000; padding:10px 20px; font-weight:700;" onclick="Admin.markKnockoutLive('${stage}', ${idx})">
+                  🔴 Mark as LIVE
+                </button>
                 <button class="btn btn-blue" onclick="Admin.saveKnockoutMatch('${stage}', ${idx})" style="padding:10px 24px;">
                   💾 Save Match Result
                 </button>
@@ -3264,6 +3267,27 @@
         this.loadKnockoutMatches();
         this.closeKnockoutModal();
         UI.toast(`🗑️ Match entry cleared!`);
+      },
+
+      markKnockoutLive(stage, idx) {
+        const match = stage === 'thirdPlace' || stage === 'final'
+          ? AppState.knockout[stage]
+          : AppState.knockout[stage][idx];
+
+        const score1Val = document.getElementById("koScore1").value;
+        const score2Val = document.getElementById("koScore2").value;
+
+        // Set status to LIVE
+        match.status = "LIVE";
+        match.score1 = score1Val !== "" ? parseInt(score1Val) : 0;
+        match.score2 = score2Val !== "" ? parseInt(score2Val) : 0;
+        match.winner = null; // No winner yet since it's live
+
+        DB.save(AppState);
+        Renderer.renderAll();
+        this.loadKnockoutMatches();
+        this.closeKnockoutModal();
+        UI.toast(`🔴 Match marked as LIVE!`);
       }
     };
 
