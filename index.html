@@ -594,7 +594,7 @@
     </div>
     <div class="nav-actions">
       <div class="live-pill" id="livePill"><span class="live-dot"></span> <span id="liveLabel">LIVE</span></div>
-      <span class="last-sync" id="syncStatus">Starting…</span>
+      <span class="last-sync" id="liveClock">--:--:-- IST</span>
       <button class="admin-btn" onclick="UI.openAdminModal()">🔐 Admin</button>
     </div>
   </header>
@@ -721,13 +721,15 @@
           <button class="close-modal" onclick="UI.closeAdminModal()">&times;</button>
         </div>
         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
-          Enter password to access live tournament scorekeeping.
+          Sign in with your Firebase admin account to access tournament scorekeeping.
         </p>
+        <label>Admin Email</label>
+        <input type="text" id="adminEmailInput" placeholder="admin@example.com" autocomplete="email">
         <label>Admin Password</label>
-        <input type="password" id="adminPassInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') Admin.login()">
+        <input type="password" id="adminPassInput" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter') Admin.login()">
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
           <button class="btn btn-ghost" onclick="UI.closeAdminModal()">Cancel</button>
-          <button class="btn btn-blue" onclick="Admin.login()">Authorize</button>
+          <button class="btn btn-blue" id="adminLoginBtn" onclick="Admin.login()">Sign In</button>
         </div>
       </div>
 
@@ -936,25 +938,43 @@
        FIREBASE SDK — loaded from Google CDN
        ═══════════════════════════════════════════════════ -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
   <script>
     // ╔══════════════════════════════════════════════════════════════╗
-    // ║  🔥 FIREBASE CONFIG                                          ║
+    // ║  🔥 FIREBASE CONFIG — Load from external file              ║
     // ╚══════════════════════════════════════════════════════════════╝
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBp1YzEoGoN8zZRuX5sOtfNAIb_0CI8z5A",
-      authDomain: "gs-arena-ff.firebaseapp.com",
-      databaseURL: "https://gs-arena-ff-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "gs-arena-ff",
-      storageBucket: "gs-arena-ff.firebasestorage.app",
-      messagingSenderId: "462282895857",
-      appId: "1:462282895857:web:2ff107afeac7cdcb6fd450"
-    };
+    let FIREBASE_CONFIG = null;
 
-    const ADMIN_PASSWORD = "gsarena2026";
+    function tickLiveClock() {
+      const el = document.getElementById("liveClock");
+      if (!el) return;
+      const now = new Date();
+      const ist = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (5.5 * 3600000));
+      el.textContent = ist.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " IST";
+    }
+
+    async function loadFirebaseConfig() {
+      try {
+        const response = await fetch('./firebase-config.json');
+        if (!response.ok) throw new Error('Failed to load firebase-config.json');
+        FIREBASE_CONFIG = await response.json();
+        initFirebase();
+        Renderer.renderAll();
+        tickLiveClock();
+        setInterval(tickLiveClock, 1000);
+        setupKnockoutSection();
+      } catch (err) {
+        console.error("❌ Firebase config load error:", err);
+        setConnectionUI("offline");
+        UI.toast("⚠️ Firebase config not found. Running in offline mode.", true);
+      }
+    }
+
     const DB_PATH = "tournament";
     let firebaseDB = null;
+    let firebaseAuth = null;
     let isFirebaseReady = false;
 
     // ─────────────────────────────────────────────────────────────
@@ -1380,26 +1400,34 @@
       try {
         firebase.initializeApp(FIREBASE_CONFIG);
         firebaseDB = firebase.database();
+        firebaseAuth = firebase.auth();
         isFirebaseReady = true;
         setConnectionUI("connected");
 
+        // Listen for database changes
         firebaseDB.ref(DB_PATH).on('value', snap => {
           const data = snap.val();
           if (data) {
             if (!data.groupMatches) data.groupMatches = { A: [], B: [], C: [], D: [] };
             AppState = data;
             Renderer.renderAll();
-            const ts = new Date(AppState.lastUpdated);
-            const syncEl = document.getElementById("syncStatus");
-            if (syncEl) {
-              syncEl.textContent = `Live · ${ts.toLocaleTimeString("en-IN", {hour:"2-digit", minute:"2-digit", second:"2-digit"})} IST`;
-            }
           }
         });
 
+        // Listen for connection state changes
         firebaseDB.ref('.info/connected').on('value', snap => {
           setConnectionUI(snap.val() ? "connected" : "disconnected");
         });
+
+        // Listen for auth state changes
+        firebaseAuth.onAuthStateChanged(user => {
+          if (user) {
+            Admin._handleLoginSuccess(user.email);
+          } else {
+            Admin._handleLogoutSuccess();
+          }
+        });
+
       } catch (err) {
         console.error("❌ Firebase error:", err);
         setConnectionUI("offline");
@@ -1409,20 +1437,17 @@
     function setConnectionUI(state) {
       const pill = document.getElementById("livePill");
       const label = document.getElementById("liveLabel");
-      const sync = document.getElementById("syncStatus");
-      if (!pill || !label || !sync) return;
+      if (!pill || !label) return;
 
       if (state === "connected") {
         pill.className = "live-pill";
         label.textContent = "LIVE";
-        sync.textContent = "Connected";
       } else if (state === "disconnected") {
         pill.className = "live-pill";
         label.textContent = "RECONNECTING";
       } else {
         pill.className = "live-pill offline-pill";
         label.textContent = "OFFLINE";
-        sync.textContent = "Local Only";
       }
     }
 
@@ -2344,25 +2369,67 @@
     const Admin = {
       isAuth: false,
       login() {
-        if (document.getElementById("adminPassInput").value === ADMIN_PASSWORD) {
-          this.isAuth = true;
-          document.getElementById("adminLoginView").style.display = "none";
-          document.getElementById("adminDashboardView").style.display = "block";
-          const syncLabel = document.getElementById("adminSyncLabel");
-          if (syncLabel) {
-            syncLabel.textContent = isFirebaseReady ? "● Live — audience sees changes instantly" : "● Offline mode — local only";
-            syncLabel.style.color = isFirebaseReady ? "var(--accent-green)" : "var(--text-muted)";
-          }
-          this.renderRegistryList();
-          UI.toast("Authorized!");
-        } else { UI.toast("Wrong password", true); }
+        const email = document.getElementById("adminEmailInput").value.trim();
+        const pwd = document.getElementById("adminPassInput").value;
+        const btn = document.getElementById("adminLoginBtn");
+
+        if (!email || !pwd) {
+          UI.toast("Please enter both email and password", true);
+          return;
+        }
+
+        if (!firebaseAuth) {
+          UI.toast("Firebase Auth not initialized yet.", true);
+          return;
+        }
+
+        btn.textContent = "Signing In...";
+        btn.disabled = true;
+
+        firebaseAuth.signInWithEmailAndPassword(email, pwd)
+          .then((userCredential) => {
+            // Handled by onAuthStateChanged
+            document.getElementById("adminEmailInput").value = "";
+            document.getElementById("adminPassInput").value = "";
+            btn.textContent = "Sign In";
+            btn.disabled = false;
+          })
+          .catch((error) => {
+            console.error("Auth error", error);
+            UI.toast(error.message, true);
+            btn.textContent = "Sign In";
+            btn.disabled = false;
+          });
       },
 
       logout() {
+        if (firebaseAuth) {
+          firebaseAuth.signOut().catch(err => console.error(err));
+        } else {
+          this._handleLogoutSuccess();
+        }
+      },
+
+      _handleLoginSuccess(email) {
+        this.isAuth = true;
+        document.getElementById("adminLoginView").style.display = "none";
+        document.getElementById("adminDashboardView").style.display = "block";
+
+        const syncLabel = document.getElementById("adminSyncLabel");
+        if (syncLabel) {
+          syncLabel.textContent = isFirebaseReady
+            ? `● Live — signed in as ${email}`
+            : "● Offline mode — local only";
+          syncLabel.style.color = isFirebaseReady ? "var(--accent-green)" : "var(--text-muted)";
+        }
+
+        this.renderRegistryList();
+      },
+
+      _handleLogoutSuccess() {
         this.isAuth = false;
         document.getElementById("adminLoginView").style.display = "block";
         document.getElementById("adminDashboardView").style.display = "none";
-        document.getElementById("adminPassInput").value = "";
       },
 
       // ── Manual Team Registration ──
@@ -3631,14 +3698,15 @@
     };
 
     // ─── BOOT ────────────────────────────────────────
-    initFirebase();
-    Renderer.renderAll();
+    loadFirebaseConfig();
 
-    setInterval(() => {
-      const hasTeams = Object.values(AppState.groups).some(g => g.length > 0);
-      const section = document.getElementById("knockoutMatchSection");
-      if (section) section.style.display = hasTeams ? "block" : "none";
-    }, 1000);
+    function setupKnockoutSection() {
+      setInterval(() => {
+        const hasTeams = Object.values(AppState.groups).some(g => g.length > 0);
+        const section = document.getElementById("knockoutMatchSection");
+        if (section) section.style.display = hasTeams ? "block" : "none";
+      }, 1000);
+    }
   </script>
 </body>
 </html>

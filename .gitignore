@@ -2,6 +2,12 @@
 *.pdf
 *Responses*
 
+# Environment / secrets — NEVER commit these
+.env
+.env.local
+.env.*.local
+firebase-config.json
+
 # Screenshots & images
 *.png
 *.jpg
@@ -10,3 +16,6 @@
 # OS files
 Thumbs.db
 .DS_Store
+
+# Node
+node_modules/
