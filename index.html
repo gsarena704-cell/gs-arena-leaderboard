@@ -943,9 +943,17 @@
 
   <script>
     // ╔══════════════════════════════════════════════════════════════╗
-    // ║  🔥 FIREBASE CONFIG — Load from external file              ║
+    // ║  🔥 FIREBASE CONFIG                                          ║
     // ╚══════════════════════════════════════════════════════════════╝
-    let FIREBASE_CONFIG = null;
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBp1YzEoGoN8zZRuX5sOtfNAIb_0CI8z5A",
+      authDomain: "gs-arena-ff.firebaseapp.com",
+      databaseURL: "https://gs-arena-ff-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "gs-arena-ff",
+      storageBucket: "gs-arena-ff.firebasestorage.app",
+      messagingSenderId: "462282895857",
+      appId: "1:462282895857:web:2ff107afeac7cdcb6fd450"
+    };
 
     function tickLiveClock() {
       const el = document.getElementById("liveClock");
@@ -953,23 +961,6 @@
       const now = new Date();
       const ist = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (5.5 * 3600000));
       el.textContent = ist.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " IST";
-    }
-
-    async function loadFirebaseConfig() {
-      try {
-        const response = await fetch('./firebase-config.json');
-        if (!response.ok) throw new Error('Failed to load firebase-config.json');
-        FIREBASE_CONFIG = await response.json();
-        initFirebase();
-        Renderer.renderAll();
-        tickLiveClock();
-        setInterval(tickLiveClock, 1000);
-        setupKnockoutSection();
-      } catch (err) {
-        console.error("❌ Firebase config load error:", err);
-        setConnectionUI("offline");
-        UI.toast("⚠️ Firebase config not found. Running in offline mode.", true);
-      }
     }
 
     const DB_PATH = "tournament";
@@ -3698,7 +3689,11 @@
     };
 
     // ─── BOOT ────────────────────────────────────────
-    loadFirebaseConfig();
+    initFirebase();
+    Renderer.renderAll();
+    tickLiveClock();
+    setInterval(tickLiveClock, 1000);
+    setupKnockoutSection();
 
     function setupKnockoutSection() {
       setInterval(() => {
